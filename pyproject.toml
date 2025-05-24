@@ -1,0 +1,17 @@
+[project]
+name = "image-token"
+version = "0.1.0"
+description = "A package to calculate the number of tokens in an image or folder"
+readme = "README.md"
+license = { file="LICENSE" }
+requires-python = ">=3.9"
+dependencies = [
+    "pytest>=8.3.5",
+]
+
+[project.urls]
+Homepage = "https://github.com/yourusername/image-token"
+
+[build-system]
+requires = ["setuptools>=61.0"]
+build-backend = "setuptools.build_meta"

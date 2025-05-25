@@ -16,7 +16,7 @@ def process_image(path: str, model_config: dict):
 
     num_tokens = calculate_image_tokens(width=width, height=height)
 
-    return num_tokens * model_config["factor"]
+    return int(num_tokens * model_config["factor"])
 
 
 def get_token(model_name: str, path: str):
@@ -29,7 +29,3 @@ def get_token(model_name: str, path: str):
         print("Total number of tokens: ", num_tokens)
 
         return num_tokens
-
-
-if __name__ == "__main__":
-    get_token(model_name="gpt-4.1-nano", path=r"D:\youtube\imagetoken\test_image4.jpg")

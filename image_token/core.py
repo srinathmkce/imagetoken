@@ -52,7 +52,3 @@ def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
 
     # Final token count is number of patches
     return final_patches_w * final_patches_h
-
-
-if __name__ == "__main__":
-    print(calculate_image_tokens(1780, 1780))

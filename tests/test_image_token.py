@@ -2,7 +2,8 @@ import pytest
 import tempfile
 import shutil
 import os
-from image_token import get_token
+import json
+from image_token import get_token, get_cost
 
 
 def test_invalid_file_path():
@@ -12,7 +13,7 @@ def test_invalid_file_path():
 
 def test_invalid_model_name():
     with pytest.raises(ValueError):
-        get_token(model_name="dummy", path=r"tests\kitten.jpg")
+        get_token(model_name="dummy", path=r"tests\image_folder\kitten.jpg")
 
 
 def test_invalid_file_extension():
@@ -27,18 +28,62 @@ def test_invalid_file_extension():
 
 
 def test_valid_file_path():
-    assert get_token(model_name="gpt-4.1-mini", path=r"tests\kitten.jpg") == 856
+    assert (
+        get_token(model_name="gpt-4.1-mini", path=r"tests\image_folder\kitten.jpg")
+        == 865
+    )
 
 
 def test_multiple_fomat():
-    # copy kitten.jpg to kitten.jpeg and kitten.png
-    shutil.copyfile(r"tests\kitten.jpg", r"tests\kitten.jpeg")
-    shutil.copyfile(r"tests\kitten.jpg", r"tests\kitten.png")
+    assert (
+        get_token(model_name="gpt-4.1-mini", path=r"tests\image_folder\kitten.jpg")
+        == 865
+    )
+    assert (
+        get_token(model_name="gpt-4.1-mini", path=r"tests\image_folder\kitten.jpeg")
+        == 2473
+    )
+    assert (
+        get_token(model_name="gpt-4.1-mini", path=r"tests\image_folder\kitten.png")
+        == 423
+    )
 
-    assert get_token(model_name="gpt-4.1-mini", path=r"tests\kitten.jpg") == 856
-    assert get_token(model_name="gpt-4.1-mini", path=r"tests\kitten.jpeg") == 856
-    assert get_token(model_name="gpt-4.1-mini", path=r"tests\kitten.png") == 856
 
-    # remove the copied files
-    os.remove(r"tests\kitten.jpeg")
-    os.remove(r"tests\kitten.png")
+def test_get_tokens_with_folder():
+    path = r"tests\image_folder"
+    assert get_token(model_name="gpt-4.1-mini", path=path) == 3761
+
+
+def test_get_tokens_for_file_and_save():
+    path = r"tests\image_folder\kitten.jpg"
+    output_path = "output.json"
+    assert get_token(model_name="gpt-4.1-mini", path=path, save_to=output_path) == 865
+
+    with open(output_path, "r") as f:
+        result = json.load(f)
+        assert len(result) == 1
+        assert result[path] == 865
+
+    os.remove(output_path)
+
+
+def test_get_tokens_for_folder_and_save():
+    path = r"tests\image_folder"
+    output_path = "output.json"
+    assert get_token(model_name="gpt-4.1-mini", path=path, save_to=output_path) == 3761
+
+    with open(output_path, "r") as f:
+        result = json.load(f)
+        assert len(result) == 3
+    os.remove(output_path)
+
+
+def test_multiple_models():
+    assert (
+        get_token(model_name="gpt-4.1-mini", path=r"tests\image_folder\kitten.jpg")
+        == 865
+    )
+    assert (
+        get_token(model_name="gpt-4.1-nano", path=r"tests\image_folder\kitten.jpg")
+        == 1310
+    )

@@ -2,6 +2,12 @@
 
 Utility to estimate the number of tokens in an image or directory of images for OpenAI models.
 
+## Install using pip
+
+```bash
+pip install image-token
+```
+
 ## Supported models
 
 - gpt-4.1-mini

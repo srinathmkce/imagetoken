@@ -1,14 +1,44 @@
 # imagetoken
 
-1. Create config with gpt models 
-2. ⁠write a method which takes image path and returns number of tokens 
-3. ⁠option to write to file 
-4. ⁠option to add number of system tokens
-5. ⁠option to add estimated number of output tokens 
-6. ⁠option for cost calculation and option for url
-7. Identify images in the directory 
-8. ⁠option to search sub directories 
-9. ⁠package into python. 
-10. ⁠create an example with huggingace dataset 
-11. ⁠write a detailed readme 
-12. ⁠add a diagram
+Utility to estimate the number of tokens in an image or directory of images for OpenAI models.
+
+## Supported models
+
+- gpt-4.1-mini
+- gpt-4.1-nano
+
+## Usage
+
+To get the number of tokens for a single image
+```python
+from image_token import get_token
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"kitten.jpg")
+```
+
+To get the number of tokens for a directory of images
+```python
+from image_token import get_token
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
+```
+
+To get the estimated cost of generating text from an image or directory of images
+```python
+from image_token import get_cost
+cost = get_cost(model_name="gpt-4.1-nano", system_prompt_tokens=300 * 100, approx_output_tokens=100 * 100, path=r"image_folder")
+```
+
+## Run unit tests
+
+Install required packages using `uv` package manager
+
+```bash
+uv install
+```
+
+Create an `.env` file in the project root directory and set the openai key `OPENAI_API_KEY`
+
+Run pytests with the following command
+
+```bash
+pytest -sv tests
+```

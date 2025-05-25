@@ -10,7 +10,7 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/yourusername/image-token"
+Homepage = "https://github.com/srinathmkce/imagetoken"
 
 [build-system]
 requires = ["setuptools>=61.0"]

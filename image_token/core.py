@@ -38,14 +38,16 @@ def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
 
     # Calculate patch count from scaled dimensions
     patches_w_scaled = scaled_width / patch_size
-    scaled_height / patch_size
+    patches_h_scaled = scaled_height / patch_size
 
     # Fit the image to an integer number of patches (round down width)
     adjusted_patches_w = int(patches_w_scaled)
-    scale_adjust = adjusted_patches_w / patches_w_scaled
+    adjusted_patches_h = int(patches_h_scaled)
+    scale_adjust_w = adjusted_patches_w / patches_w_scaled
+    scale_adjust_h = adjusted_patches_h / patches_h_scaled
 
-    final_width = scaled_width * scale_adjust
-    final_height = scaled_height * scale_adjust
+    final_width = scaled_width * scale_adjust_w
+    final_height = scaled_height * scale_adjust_h
 
     final_patches_w = int(final_width / patch_size)
     final_patches_h = int(final_height / patch_size)

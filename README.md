@@ -35,10 +35,17 @@ cost = get_cost(model_name="gpt-4.1-nano", system_prompt_tokens=300 * 100, appro
 
 ## Run unit tests
 
-Install required packages using `uv` package manager
+Perform test using `poetry` package manager
+
+Add the package using the command
 
 ```bash
-uv install
+poetry add <package_name>
+```
+Install required packages using
+
+```bash
+poetry install
 ```
 
 Create an `.env` file in the project root directory and set the openai key `OPENAI_API_KEY`
@@ -46,5 +53,5 @@ Create an `.env` file in the project root directory and set the openai key `OPEN
 Run pytests with the following command
 
 ```bash
-pytest -sv tests
+poetry run pytest -sv tests
 ```

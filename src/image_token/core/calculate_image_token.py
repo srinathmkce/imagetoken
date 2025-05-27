@@ -37,4 +37,4 @@ def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
 
 
 if __name__ == "__main__":
-    print(calculate_image_tokens(1780, 1780))
+    print(calculate_image_tokens(1600, 1600))

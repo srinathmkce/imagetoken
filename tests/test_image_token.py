@@ -2,18 +2,50 @@ import pytest
 import tempfile
 import os
 import json
+from PIL import Image
+from tempfile import NamedTemporaryFile
 from image_token import get_token
 from pathlib import Path
+
+JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
+JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
+PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
+GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
+GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"
+EXPECTED_OUTPUT_TOKENS = {
+    GPT_4_1_MINI_MODEL_NAME: {
+        JPG_FILE_PATH: 865,
+        JPEG_FILE_PATH: 2473,
+        PNG_FILE_PATH: 423,
+        "total_tokens": 3761,
+    },
+    GPT_4_1_NANO_MODEL_NAME: {
+        JPG_FILE_PATH: 1310,
+        JPEG_FILE_PATH: 3750,
+        PNG_FILE_PATH: 638,
+        "total_tokens": 5698,
+    },
+}
+
+test_cases = {
+    (64, 64): 15,
+    (128, 256): 60,
+    (256, 128): 60,
+    (300, 500): 268,
+    (800, 200): 292,
+    (512, 512): 423,
+    (1024, 1024): 1667,
+}
 
 
 def test_invalid_file_path():
     with pytest.raises(FileNotFoundError):
-        get_token(model_name="gpt-4.1-nano", path=r"dummy.png")
+        get_token(model_name=GPT_4_1_NANO_MODEL_NAME, path=r"dummy.png")
 
 
 def test_invalid_model_name():
     with pytest.raises(ValueError):
-        get_token(model_name="dummy", path = str(Path("tests") / "image_folder" / "kitten.jpg"))
+        get_token(model_name="dummy", path=JPG_FILE_PATH)
 
 
 def test_invalid_file_extension():
@@ -24,53 +56,77 @@ def test_invalid_file_extension():
             f.write("This is a dummy file")
 
         with pytest.raises(ValueError):
-            get_token(model_name="gpt-4.1-mini", path=temp_file_path)
+            get_token(model_name=GPT_4_1_MINI_MODEL_NAME, path=temp_file_path)
 
 
-def test_valid_file_path():
+@pytest.mark.parametrize(
+    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
+)
+def test_valid_file_path(model_name):
     assert (
-        get_token(model_name="gpt-4.1-mini", path = str(Path("tests") / "image_folder" / "kitten.jpg"))
-        == 865
+        get_token(model_name=model_name, path=JPG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
     )
 
 
-def test_multiple_fomat():
+@pytest.mark.parametrize(
+    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
+)
+def test_multiple_fomat(model_name):
     assert (
-        get_token(model_name="gpt-4.1-mini", path = str(Path("tests") / "image_folder" / "kitten.jpg"))
-        == 865
+        get_token(model_name=model_name, path=JPG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
     )
     assert (
-        get_token(model_name="gpt-4.1-mini", path = str(Path("tests") / "image_folder" / "kitten.jpeg"))
-        == 2473
+        get_token(model_name=model_name, path=JPEG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPEG_FILE_PATH]
     )
     assert (
-        get_token(model_name="gpt-4.1-mini", path = str(Path("tests") / "image_folder" / "kitten.png"))
-        == 423
+        get_token(model_name=model_name, path=PNG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
     )
 
 
-def test_get_tokens_with_folder():
+@pytest.mark.parametrize(
+    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
+)
+def test_get_tokens_with_folder(model_name):
     path = str(Path("tests") / "image_folder")
-    assert get_token(model_name="gpt-4.1-mini", path=path) == 3761
+    assert (
+        get_token(model_name=model_name, path=path)
+        == EXPECTED_OUTPUT_TOKENS[model_name]["total_tokens"]
+    )
 
 
-def test_get_tokens_for_file_and_save():
-    path = str(Path("tests") / "image_folder" / "kitten.jpg")
-    output_path = "output.json"
-    assert get_token(model_name="gpt-4.1-mini", path=path, save_to=output_path) == 865
+@pytest.mark.parametrize(
+    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
+)
+def test_get_tokens_for_file_and_save(model_name):
+    output_path = f"{model_name}_output.json"
+    expected_tokens = EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+    assert (
+        get_token(model_name=model_name, path=JPG_FILE_PATH, save_to=output_path)
+        == expected_tokens
+    )
 
     with open(output_path, "r") as f:
         result = json.load(f)
         assert len(result) == 1
-        assert result[path] == 865
+        assert result[JPG_FILE_PATH] == expected_tokens
 
     os.remove(output_path)
 
 
-def test_get_tokens_for_folder_and_save():
+@pytest.mark.parametrize(
+    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
+)
+def test_get_tokens_for_folder_and_save(model_name):
     path = str(Path("tests") / "image_folder")
-    output_path = "output.json"
-    assert get_token(model_name="gpt-4.1-mini", path=path, save_to=output_path) == 3761
+    output_path = f"{model_name}_output.json"
+    total_tokens = EXPECTED_OUTPUT_TOKENS[model_name]["total_tokens"]
+    assert (
+        get_token(model_name=model_name, path=path, save_to=output_path) == total_tokens
+    )
 
     with open(output_path, "r") as f:
         result = json.load(f)
@@ -78,12 +134,18 @@ def test_get_tokens_for_folder_and_save():
     os.remove(output_path)
 
 
-def test_multiple_models():
-    assert (
-        get_token(model_name="gpt-4.1-mini", path = str(Path("tests") / "image_folder" / "kitten.jpg"))
-        == 865
-    )
-    assert (
-        get_token(model_name="gpt-4.1-nano", path = str(Path("tests") / "image_folder" / "kitten.jpg"))
-        == 1310
-    )
+@pytest.mark.parametrize("width,height", test_cases.keys())
+def test_get_token_on_resized_images(width, height):
+    with Image.open(JPG_FILE_PATH) as img:
+        resized_img = img.resize((width, height))
+        with NamedTemporaryFile(suffix=".jpg", delete=False) as tmp:
+            resized_img.save(tmp.name)
+            tmp_path = tmp.name
+
+    try:
+        tokens = get_token(GPT_4_1_MINI_MODEL_NAME, tmp_path)
+        expected_tokens = test_cases[(width, height)]
+        print(f"Testing ({width}x{height}): Got {tokens}, Expected {expected_tokens}")
+        assert tokens == expected_tokens, f"Token count mismatch for ({width}x{height})"
+    finally:
+        os.remove(tmp_path)

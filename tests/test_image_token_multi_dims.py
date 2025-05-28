@@ -1,13 +1,7 @@
 # Run these test cases only at the end of release
-import base64
 import os
 import pytest
-from PIL import Image
-from tempfile import NamedTemporaryFile
 from dotenv import load_dotenv
-from image_token import get_token
-from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage
 
 
 # Dimensions to test

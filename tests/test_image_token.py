@@ -7,6 +7,7 @@ from tempfile import NamedTemporaryFile
 from image_token import get_token
 from pathlib import Path
 
+# Constants for file paths and expected output tokens
 JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
 JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
 PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
@@ -27,6 +28,7 @@ EXPECTED_OUTPUT_TOKENS = {
     },
 }
 
+# # Test cases for different image sizes and expected token counts
 test_cases = {
     (64, 64): 15,
     (128, 256): 60,

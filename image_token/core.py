@@ -1,7 +1,7 @@
 import math
 
 
-def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
+def calculate_image_tokens_patch(width, height, max_tokens=1536, patch_size=32):
     # Step 1: Calculate number of patches without scaling
     """
     Calculates the number of image tokens based on the dimensions of the image.
@@ -54,3 +54,46 @@ def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
 
     # Final token count is number of patches
     return final_patches_w * final_patches_h
+
+def calculate_image_tokens_tile(width, height, tile_models, model_name, tile_size=512):
+    """Calculate the number of image tokens.m
+
+    The calculation is based on the dimensions of the image and the specified tile model.
+
+    Args:
+        width (int): The width of the image.
+        height (int): The height of the image.
+        tile_models (dict): A dictionary containing tile model configurations.
+        model_name (str): The name of the model to use for token calculation.
+        tile_size (int, optional): The size of each tile. Defaults to 512.
+    
+    Returns:
+        int: The calculated number of image tokens.
+
+    Notes:
+        - The function first scales the image to fit within a 2048x2048 box.
+        - It then resizes the shortest side to 768 pixels.
+        - Finally, it counts how many 512x512 tiles fit into the resized image.
+        - The number of tokens is calculated based on the base token count and the number of tiles.
+    """
+
+    # Step 1: Scale to fit in 2048x2048
+    max_side = 2048
+    scale_factor_1 = min(max_side / width, max_side / height)
+    width_resized = width * scale_factor_1
+    height_resized = height * scale_factor_1
+
+    # Step 2: Resize shortest side to 768
+    shortest = min(width_resized, height_resized)
+    scale_factor_2 = 768 / shortest
+    final_width = width_resized * scale_factor_2
+    final_height = height_resized * scale_factor_2
+
+    # Step 3: Count tiles (each 512x512)
+    tiles_w = math.ceil(final_width / tile_size)
+    tiles_h = math.ceil(final_height / tile_size)
+    tile_count = tiles_w * tiles_h
+
+    base = tile_models[model_name]["base"]
+    per_tile = tile_models[model_name]["tile"]
+    return base + tile_count * per_tile

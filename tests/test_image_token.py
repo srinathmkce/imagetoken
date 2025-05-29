@@ -6,38 +6,12 @@ from PIL import Image
 from tempfile import NamedTemporaryFile
 from image_token import get_token
 from pathlib import Path
-
-# Constants for file paths and expected output tokens
-JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
-JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
-PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
-GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
-GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"
-EXPECTED_OUTPUT_TOKENS = {
-    GPT_4_1_MINI_MODEL_NAME: {
-        JPG_FILE_PATH: 865,
-        JPEG_FILE_PATH: 2473,
-        PNG_FILE_PATH: 423,
-        "total_tokens": 3761,
-    },
-    GPT_4_1_NANO_MODEL_NAME: {
-        JPG_FILE_PATH: 1310,
-        JPEG_FILE_PATH: 3750,
-        PNG_FILE_PATH: 638,
-        "total_tokens": 5698,
-    },
-}
-
-# # Test cases for different image sizes and expected token counts
-test_cases = {
-    (64, 64): 15,
-    (128, 256): 60,
-    (256, 128): 60,
-    (300, 500): 268,
-    (800, 200): 292,
-    (512, 512): 423,
-    (1024, 1024): 1667,
-}
+from conftest import (
+    JPG_FILE_PATH, JPEG_FILE_PATH, PNG_FILE_PATH,
+    GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME,
+    MODEL_NAMES, EXPECTED_OUTPUT_TOKENS,
+    test_cases
+)
 
 
 def test_invalid_file_path():
@@ -61,9 +35,7 @@ def test_invalid_file_extension():
             get_token(model_name=GPT_4_1_MINI_MODEL_NAME, path=temp_file_path)
 
 
-@pytest.mark.parametrize(
-    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
-)
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_valid_file_path(model_name):
     assert (
         get_token(model_name=model_name, path=JPG_FILE_PATH)
@@ -71,9 +43,7 @@ def test_valid_file_path(model_name):
     )
 
 
-@pytest.mark.parametrize(
-    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
-)
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_multiple_fomat(model_name):
     assert (
         get_token(model_name=model_name, path=JPG_FILE_PATH)
@@ -89,9 +59,7 @@ def test_multiple_fomat(model_name):
     )
 
 
-@pytest.mark.parametrize(
-    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
-)
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_get_tokens_with_folder(model_name):
     path = str(Path("tests") / "image_folder")
     assert (
@@ -100,9 +68,7 @@ def test_get_tokens_with_folder(model_name):
     )
 
 
-@pytest.mark.parametrize(
-    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
-)
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_get_tokens_for_file_and_save(model_name):
     output_path = f"{model_name}_output.json"
     expected_tokens = EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
@@ -119,9 +85,7 @@ def test_get_tokens_for_file_and_save(model_name):
     os.remove(output_path)
 
 
-@pytest.mark.parametrize(
-    "model_name", [GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME]
-)
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_get_tokens_for_folder_and_save(model_name):
     path = str(Path("tests") / "image_folder")
     output_path = f"{model_name}_output.json"

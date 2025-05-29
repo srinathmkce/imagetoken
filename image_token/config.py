@@ -35,18 +35,6 @@ openai_config = {
         "input_tokens": 2.5,
         "output_tokens": 10.0,
     },
-    "o1": {
-    "factor": 1.0,
-    "max_tokens": 128000,
-    "input_tokens": 15.0,
-    "output_tokens": 60.0
-    },
-    "o3": {
-    "factor": 1.0,
-    "max_tokens": 200000,
-    "input_tokens": 10.0,
-    "output_tokens": 40.0
-    },
 }
 
 # Models using patch-based method
@@ -61,6 +49,4 @@ tile_models = {
     "gpt-4.1": {"base": 85, "tile": 170},
     "gpt-4o": {"base": 85, "tile": 170},
     "gpt-4o-mini": {"base": 2833, "tile": 5667},
-    "o1": {"base": 75, "tile": 150},
-    "o3": {"base": 75, "tile": 150},
 }

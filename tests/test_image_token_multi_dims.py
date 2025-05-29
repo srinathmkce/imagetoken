@@ -3,19 +3,6 @@ import os
 import pytest
 from dotenv import load_dotenv
 
-
-# Dimensions to test
-test_dimensions = [
-    (64, 64),
-    (128, 256),
-    (256, 128),
-    (300, 500),
-    (800, 200),
-    (512, 512),
-    (1024, 1024),
-]
-
-
 @pytest.fixture(scope="session", autouse=True)
 def load_env():
     load_dotenv()
@@ -23,7 +10,7 @@ def load_env():
 
 
 # @pytest.mark.parametrize("width,height", test_dimensions)
-# @pytest.mark.parametrize("model_name", ["gpt-4.1-mini", "gpt-4.1-nano"])
+# @pytest.mark.parametrize("model_name", MODEL_NAMES)
 # def test_get_token_matches_openai_response(model_name, width, height):
 #     original_image_path = "tests/image_folder/kitten.jpg"
 #     assert os.path.exists(original_image_path), "kitten.jpg not found"

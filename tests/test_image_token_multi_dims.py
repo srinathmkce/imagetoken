@@ -2,9 +2,6 @@
 import os
 import pytest
 from dotenv import load_dotenv
-from conftest import (
-    test_dimensions, MODEL_NAMES
-)
 
 @pytest.fixture(scope="session", autouse=True)
 def load_env():

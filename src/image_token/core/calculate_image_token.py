@@ -1,7 +1,7 @@
 import math
 
 
-def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
+def calculate_image_tokens(width, height, max_tokens, patch_size=32):
     # Step 1: Calculate number of patches without scaling
     patches_w = (width + patch_size - 1) // patch_size
     patches_h = (height + patch_size - 1) // patch_size
@@ -37,4 +37,4 @@ def calculate_image_tokens(width, height, patch_size=32, max_tokens=1536):
 
 
 if __name__ == "__main__":
-    print(calculate_image_tokens(1600, 1600))
+    print(calculate_image_tokens(1600, 1600, 1536))

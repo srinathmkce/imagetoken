@@ -12,6 +12,10 @@ pip install image-token
 
 - gpt-4.1-mini
 - gpt-4.1-nano
+- gpt-4.1
+- o4-mini
+- gpt-4o
+- gpt-4o-mini
 
 ## Usage
 

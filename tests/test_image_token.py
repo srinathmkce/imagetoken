@@ -7,10 +7,14 @@ from tempfile import NamedTemporaryFile
 from image_token import get_token
 from pathlib import Path
 from conftest import (
-    JPG_FILE_PATH, JPEG_FILE_PATH, PNG_FILE_PATH,
-    GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME,
-    MODEL_NAMES, EXPECTED_OUTPUT_TOKENS,
-    test_cases
+    JPG_FILE_PATH,
+    JPEG_FILE_PATH,
+    PNG_FILE_PATH,
+    GPT_4_1_MINI_MODEL_NAME,
+    GPT_4_1_NANO_MODEL_NAME,
+    MODEL_NAMES,
+    EXPECTED_OUTPUT_TOKENS,
+    test_cases,
 )
 
 

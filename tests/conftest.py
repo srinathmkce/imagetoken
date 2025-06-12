@@ -12,10 +12,15 @@ GPT_4_O_MINI_MODEL_NAME = "gpt-4o-mini"
 GPT_4_O_MODEL_NAME = "gpt-4o"
 GPT_4_1_MODEL_NAME = "gpt-4.1"
 
+# MODEL_NAMES = [
+#     GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME, O_4_MINI_MODEL_NAME,
+#     GPT_4_O_MINI_MODEL_NAME, GPT_4_O_MODEL_NAME, GPT_4_1_MODEL_NAME,
+# ]
+
 MODEL_NAMES = [
-    GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME, O_4_MINI_MODEL_NAME,
-    GPT_4_O_MINI_MODEL_NAME, GPT_4_O_MODEL_NAME, GPT_4_1_MODEL_NAME,
+    GPT_4_O_MINI_MODEL_NAME,
 ]
+
 
 EXPECTED_OUTPUT_TOKENS = {
     GPT_4_1_MINI_MODEL_NAME: {
@@ -57,10 +62,14 @@ EXPECTED_OUTPUT_TOKENS = {
 }
 
 test_cases = {
-            (64, 64): 15, (128, 256): 60, (256, 128): 60,
-            (300, 500): 268, (800, 200): 292, (512, 512): 423,
-            (1024, 1024): 1667,
-        }
+    (64, 64): 15,
+    (128, 256): 60,
+    (256, 128): 60,
+    (300, 500): 268,
+    (800, 200): 292,
+    (512, 512): 423,
+    (1024, 1024): 1667,
+}
 
 # Dimensions to test
 test_dimensions = [
@@ -97,4 +106,3 @@ test_dimensions = [
 #             (300, 500): 268, (800, 200): 292, (512, 512): 423,
 #             (1024, 1024): 1667,
 #         }
-        

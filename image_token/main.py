@@ -6,12 +6,11 @@ from image_token.validate import (
     check_valid_model,
 )
 from image_token.utils import read_image_dims, calculate_cost, list_all_images
-from image_token.core import calculate_image_tokens_patch, calculate_image_tokens_tile
-from image_token.config import openai_config, patch_models, tile_models
+from image_token.core import calculate_image_tokens
+from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
 
-#
 
 def process_image(path: str, model_config: dict, model_name: str = None):
     """
@@ -30,18 +29,15 @@ def process_image(path: str, model_config: dict, model_name: str = None):
 
     max_tokens = model_config["max_tokens"]
 
-    if model_name in patch_models:
-        num_tokens = calculate_image_tokens_patch(width=width, height=height, max_tokens=max_tokens)
-        return int(num_tokens * model_config["factor"])
+    num_tokens = calculate_image_tokens(
+        model_name=model_name,
+        width=width,
+        height=height,
+        max_tokens=max_tokens,
+        model_config=model_config,
+    )
 
-    elif model_name in tile_models:
-        num_tokens = calculate_image_tokens_tile(
-            width=width, height=height, tile_models=tile_models, model_name=model_name
-        )
-        return num_tokens
-    else:
-        raise ValueError(f"Model {model_name} is not supported for image token calculation.")
-    
+    return num_tokens
 
 
 def get_cost(
@@ -105,7 +101,9 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
     total_tokens = 0
 
     if check_if_path_is_file(path=path):
-        num_tokens = process_image(path=path, model_config=model_config, model_name=model_name)
+        num_tokens = process_image(
+            path=path, model_config=model_config, model_name=model_name
+        )
         total_tokens = num_tokens + prefix_tokens
         # print("Total number of tokens: ", total_tokens)
         result_dict[path] = total_tokens
@@ -113,7 +111,9 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
         image_files = list_all_images(path=path)
         total_tokens = 0
         for image_path in tqdm(image_files):
-            num_tokens = process_image(path=image_path, model_config=model_config, model_name=model_name)
+            num_tokens = process_image(
+                path=image_path, model_config=model_config, model_name=model_name
+            )
             total_tokens += num_tokens + prefix_tokens
             # print(f"Total number of tokens for {image_path}: ", num_tokens + prefix_tokens)
             result_dict[image_path] = num_tokens + prefix_tokens

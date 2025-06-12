@@ -17,14 +17,14 @@ def load_env():
 @pytest.mark.parametrize("model_name", MODEL_NAMES)
 def test_with_openai_api_key_models(model_name):
     """Test the image token calculation with OpenAI API key models.
-    
+
     This test checks if the number of input tokens calculated by the image_token
     library matches the number of input tokens returned by the OpenAI API for
     the specified model when processing an image.
-    
+
     Args:
         model_name (str): The name of the model to test.
-    
+
     Notes:
         - The test reads a JPEG image file, encodes it to base64, and sends it
           to the OpenAI API.
@@ -45,9 +45,7 @@ def test_with_openai_api_key_models(model_name):
 
     image_data_url = f"data:image/jpeg;base64,{image_base64}"
 
-    llm = ChatOpenAI(
-        model=model_name, max_tokens=None, timeout=None, max_retries=2
-    )
+    llm = ChatOpenAI(model=model_name, max_tokens=None, timeout=None, max_retries=2)
 
     messages = [
         HumanMessage(
@@ -57,8 +55,11 @@ def test_with_openai_api_key_models(model_name):
         )
     ]
     response = llm.invoke(messages)
+    print(response)
     input_tokens_from_openai = response.usage_metadata["input_tokens"]
 
     print("Number of input tokens from OpenAI: ", input_tokens_from_openai)
 
-    assert int(calculated_input_tokens) == pytest.approx(input_tokens_from_openai, abs=3)
+    assert int(calculated_input_tokens) == pytest.approx(
+        input_tokens_from_openai, abs=3
+    )

@@ -1,6 +1,6 @@
 from langchain_core.callbacks import BaseCallbackHandler
 from langchain_openai import ChatOpenAI
-from langchain_core.messages import HumanMessage, SystemMessage
+from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
 from pathlib import Path
 import base64
 from PIL import Image
@@ -24,66 +24,41 @@ load_dotenv()
 
 
 class LoggingHandler(BaseCallbackHandler):
-    def __init__(self, verbose: bool = True):
+    def __init__(self):
         super().__init__()
-        self.verbose = verbose
+        self.results = []  # List of dicts: {"tokens": int, "cost": float}
 
     def _get_model_name(self, kwargs):
-        # check invocation_params is in kwargs
-        if "invocation_params" in kwargs:
-            # check model_name is in invocation_params
-            if "model_name" in kwargs["invocation_params"]:
-                return kwargs["invocation_params"]["model_name"]
-        return None
+        return kwargs.get("invocation_params", {}).get("model_name")
 
     def _get_model_config(self, model_name):
-        if model_name in openai_config:
-            return openai_config[model_name]
-        return None
+        return openai_config.get(model_name)
 
     def _get_image_size_from_data_url(self, data_url):
         try:
             image_bytes = base64.b64decode(data_url.split(",")[1])
             image = Image.open(BytesIO(image_bytes))
             return image.size
-        except Exception as e:
+        except Exception:
             return None
 
     def _calculate_image_tokens(self, model_name, width, height):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-
-        num_tokens = calculate_image_tokens(
-            model_name=model_name,
-            width=width,
-            height=height,
-            max_tokens=model_config["max_tokens"],
-            model_config=model_config,
+        return calculate_image_tokens(
+            model_name, width, height, model_config["max_tokens"], model_config
         )
-        return num_tokens
 
     def _calculate_approx_input_cost(self, model_name, input_tokens):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-
-        approx_cost = calculate_cost(
+        return calculate_cost(
             input_tokens=input_tokens, output_tokens=0, config=model_config
         )
-        return approx_cost
 
-    def on_chat_model_start(
-        self,
-        serialized,
-        messages,
-        *,
-        run_id,
-        parent_run_id=None,
-        tags=None,
-        metadata=None,
-        **kwargs,
-    ):
+    def on_chat_model_start(self, serialized, messages, **kwargs):
         model_name = self._get_model_name(kwargs)
         if not model_name:
             return
@@ -91,68 +66,147 @@ class LoggingHandler(BaseCallbackHandler):
         for em in messages:
             for message in em:
                 if isinstance(message, HumanMessage):
-                    message_content = message.content
-                    for content in message_content:
+                    for content in message.content:
                         if isinstance(content, dict) and "image_url" in content:
-                            image_url_dict = content["image_url"]
-                            if (
-                                isinstance(image_url_dict, dict)
-                                and "url" in image_url_dict
-                            ):
-                                image_url = image_url_dict["url"]
-
-                                if image_url.startswith("data:image"):
-                                    image_size = self._get_image_size_from_data_url(
-                                        image_url
+                            image_url = content["image_url"].get("url")
+                            if image_url and image_url.startswith("data:image"):
+                                size = self._get_image_size_from_data_url(image_url)
+                                if size:
+                                    width, height = size
+                                    tokens = self._calculate_image_tokens(
+                                        model_name, width, height
                                     )
-                                    if image_size:
-                                        width, height = image_size
-                                        # print(f"Width: {width}, Height: {height}")
-                                        num_tokens = self._calculate_image_tokens(
-                                            model_name, width, height
-                                        )
-                                        approx_input_cost = (
-                                            self._calculate_approx_input_cost(
-                                                model_name, num_tokens
-                                            )
-                                        )
-                                        if self.verbose:
-                                            print(
-                                                "Number of input tokens: ", num_tokens
-                                            )
-                                            print(
-                                                f"Approximate input cost: ${approx_input_cost:.4f}"
-                                            )
+                                    cost = self._calculate_approx_input_cost(
+                                        model_name, tokens
+                                    )
+
+                                    print(
+                                        f"[Simulated] Tokens: {tokens}, Cost: ${cost:.4f}"
+                                    )
+
+                                    self.results.append(
+                                        {"tokens": tokens, "cost": cost}
+                                    )
 
 
-callbacks = [LoggingHandler(verbose=False)]
-llm = ChatOpenAI(model="gpt-4.1-nano")
+def simulate_image_token_cost(llm, messages: list[BaseMessage]):
+    """
+    Simulate token and cost estimation for images in a message without hitting the OpenAI API.
 
-path = JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
+    Args:
+        llm: A LangChain ChatModel (e.g., ChatOpenAI)
+        messages: List of LangChain messages (SystemMessage, HumanMessage)
+    """
+    handler = LoggingHandler()
+    model_name = llm.model_name if hasattr(llm, "model_name") else "unknown"
 
-# response = llm.invoke("What is the capital of France?", config={"callbacks": callbacks})
-with open(JPG_FILE_PATH, "rb") as image_file:
-    image_bytes = image_file.read()
-    image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+    try:
+        # Simulate callback manually to avoid hitting API
+        handler.on_chat_model_start(
+            {}, [messages], invocation_params={"model_name": model_name}
+        )
+    except ImageTokenCostException as e:
+        # print(f"[Simulate] Tokens: {e.tokens}, Cost: ${e.cost:.4f}")
 
-image_data_url = f"data:image/jpeg;base64,{image_base64}"
+        return {"tokens": e.tokens, "cost": e.cost}
 
-messages = [
-    SystemMessage(content="You are a helpful assistant."),
-    HumanMessage(
-        content=[
-            {"type": "image_url", "image_url": {"url": image_data_url}},
-        ],
-    ),
-]
-response = llm.invoke(messages, config={"callbacks": callbacks})
+    if handler.results:
+        total_cost = 0
+        total_tokens = 0
+        for token_result in handler.results:
+            total_cost += token_result["cost"]
+            total_tokens += token_result["tokens"]
 
-print(response)
+        handler.results.append({"total_tokens": total_tokens, "total_cost": total_cost})
+        return handler.results
+    else:
+        return {"tokens": 0, "cost": 0.0}
 
-# prompt = ChatPromptTemplate.from_template("What is 1 + {number}?")
 
-# chain = prompt | llm
+def func_test():
+    llm = ChatOpenAI(model="gpt-4.1-nano")
 
-# chain_with_callbacks = chain.with_config(callbacks=callbacks)
+    path = str(Path("tests") / "image_folder" / "kitten.jpg")
 
-# chain_with_callbacks.invoke({"number": "2"})
+    # response = llm.invoke("What is the capital of France?", config={"callbacks": callbacks})
+    with open(path, "rb") as image_file:
+        image_bytes = image_file.read()
+        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+
+    image_data_url = f"data:image/jpeg;base64,{image_base64}"
+
+    messages = [
+        SystemMessage(content="You are a helpful assistant."),
+        HumanMessage(
+            content=[
+                {"type": "image_url", "image_url": {"url": image_data_url}},
+            ],
+        ),
+    ]
+
+    result = simulate_image_token_cost(llm, messages)
+
+    print(result)
+
+
+def func_test_all_images():
+    llm = ChatOpenAI(model="gpt-4.1-nano")
+    image_folder = Path("tests/image_folder")
+
+    image_files = (
+        list(image_folder.glob("*.jpg"))
+        + list(image_folder.glob("*.jpeg"))
+        + list(image_folder.glob("*.png"))
+    )
+
+    for image_path in image_files:
+        with open(image_path, "rb") as image_file:
+            image_bytes = image_file.read()
+            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+            image_data_url = f"data:image/jpeg;base64,{image_base64}"
+
+        messages = [
+            SystemMessage(content="You are a helpful assistant."),
+            HumanMessage(
+                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
+            ),
+        ]
+
+    result = simulate_image_token_cost(llm, messages)
+
+    print(result)
+
+
+def func_test_all_images_one_list():
+    llm = ChatOpenAI(model="gpt-4.1-nano")
+    image_folder = Path("tests/image_folder")
+
+    image_files = (
+        list(image_folder.glob("*.jpg"))
+        + list(image_folder.glob("*.jpeg"))
+        + list(image_folder.glob("*.png"))
+    )
+
+    messages = [
+        SystemMessage(content="You are a helpful assistant."),
+    ]
+    for image_path in image_files:
+        with open(image_path, "rb") as image_file:
+            image_bytes = image_file.read()
+            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+            image_data_url = f"data:image/jpeg;base64,{image_base64}"
+
+        messages.append(
+            HumanMessage(
+                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
+            )
+        )
+    result = simulate_image_token_cost(llm, messages)
+
+    print(result)
+
+
+if __name__ == "__main__":
+    func_test()
+    func_test_all_images()
+    func_test_all_images_one_list()

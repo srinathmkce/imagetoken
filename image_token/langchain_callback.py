@@ -105,10 +105,9 @@ def simulate_image_token_cost(llm, messages: list[BaseMessage]):
         handler.on_chat_model_start(
             {}, [messages], invocation_params={"model_name": model_name}
         )
-    except ImageTokenCostException as e:
+    except Exception as e:
         # print(f"[Simulate] Tokens: {e.tokens}, Cost: ${e.cost:.4f}")
-
-        return {"tokens": e.tokens, "cost": e.cost}
+        return {"tokens": 0, "cost": 0.0}
 
     if handler.results:
         total_cost = 0

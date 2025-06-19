@@ -5,14 +5,6 @@ from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
-import sys
-import os
-
-current_dir = os.path.dirname(os.path.abspath(__file__))
-parent_dir = os.path.dirname(current_dir)
-
-sys.path.append(parent_dir)
-
 from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from image_token.utils import calculate_cost

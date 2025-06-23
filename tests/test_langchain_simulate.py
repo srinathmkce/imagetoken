@@ -48,40 +48,9 @@ def test_simulate_single_image():
 
     result = simulate_image_token_cost(llm, messages)
 
-    assert isinstance(result, list)
-    assert len(result) == 2
-    assert result[0]["cost"] > 0
-    assert result[0]["tokens"] > 0
-    assert result[1]["total_cost"] > 0
-    assert result[1]["total_tokens"] > 0
-
-
-def func_test_all_images():
-    llm = ChatOpenAI(model="gpt-4.1-nano")
-    image_folder = Path("tests/image_folder")
-
-    image_files = (
-        list(image_folder.glob("*.jpg"))
-        + list(image_folder.glob("*.jpeg"))
-        + list(image_folder.glob("*.png"))
-    )
-
-    for image_path in image_files:
-        with open(image_path, "rb") as image_file:
-            image_bytes = image_file.read()
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-            image_data_url = f"data:image/jpeg;base64,{image_base64}"
-
-        messages = [
-            SystemMessage(content="You are a helpful assistant."),
-            HumanMessage(
-                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
-            ),
-        ]
-
-    result = simulate_image_token_cost(llm, messages)
-
-    print(result)
+    assert isinstance(result, dict)
+    assert result["tokens"] == 1320
+    assert result["cost"] == 0.00013
 
 
 def test_func_test_all_images():
@@ -110,46 +79,10 @@ def test_func_test_all_images():
         )
     result = simulate_image_token_cost(llm, messages)
 
-    assert isinstance(result, list)
-    assert len(result) == 4
-    assert result[0]["cost"] > 0
-    assert result[0]["tokens"] > 0
-    assert result[-1]["total_cost"] > 0
-    assert result[-1]["total_tokens"] > 0
+    assert isinstance(result, dict)
+    assert result["tokens"] == 5690
+    assert result["cost"] == 0.00057
 
-
-def test_func_test_all_images_one_list():
-    llm = ChatOpenAI(model="gpt-4.1-nano")
-    image_folder = Path("tests/image_folder")
-
-    image_files = (
-        list(image_folder.glob("*.jpg"))
-        + list(image_folder.glob("*.jpeg"))
-        + list(image_folder.glob("*.png"))
-    )
-
-    messages = [
-        SystemMessage(content="You are a helpful assistant."),
-    ]
-    for image_path in image_files:
-        with open(image_path, "rb") as image_file:
-            image_bytes = image_file.read()
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-            image_data_url = f"data:image/jpeg;base64,{image_base64}"
-
-        messages.append(
-            HumanMessage(
-                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
-            )
-        )
-    result = simulate_image_token_cost(llm, messages)
-
-    assert isinstance(result, list)
-    assert len(result) == 4
-    assert result[0]["cost"] > 0
-    assert result[0]["tokens"] > 0
-    assert result[-1]["total_cost"] > 0
-    assert result[-1]["total_tokens"] > 0
 
 def test_when_message_is_empty():
     llm = ChatOpenAI(model="gpt-4.1-nano")
@@ -160,8 +93,9 @@ def test_when_message_is_empty():
     messages = []
     result = simulate_image_token_cost(llm, messages)
     assert isinstance(result, dict)
-    assert result["tokens"] == 0    
+    assert result["tokens"] == 13
     assert result["cost"] == 0
+
 
 def test_when_human_message_contains_string():
     llm = ChatOpenAI(model="gpt-4.1-nano")
@@ -169,8 +103,8 @@ def test_when_human_message_contains_string():
     messages = build_messages_with_image(image_path)
     # Add a string message
     messages.append(HumanMessage(content="Hello, world!"))
-    messages = messages[-1]  
+    messages = messages[-1]
     result = simulate_image_token_cost(llm, messages)
     assert isinstance(result, dict)
-    assert result["tokens"] == 0    
+    assert result["tokens"] == 13
     assert result["cost"] == 0

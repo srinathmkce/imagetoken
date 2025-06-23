@@ -1,5 +1,13 @@
 import math
+import tiktoken
 from image_token.config import patch_models, tile_models
+
+
+def calculate_text_tokens(model_name: str, text: str):
+    enc = tiktoken.encoding_for_model("gpt-4o")
+    tokens = enc.encode(text)
+    num_tokens = len(tokens)
+    return num_tokens
 
 
 def calculate_image_tokens(

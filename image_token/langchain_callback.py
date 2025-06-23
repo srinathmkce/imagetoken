@@ -5,7 +5,7 @@ from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
-from image_token.core import calculate_image_tokens
+from image_token.core import calculate_image_tokens, calculate_text_tokens
 from image_token.config import openai_config
 from image_token.utils import calculate_cost
 
@@ -18,7 +18,9 @@ load_dotenv()
 class LoggingHandler(BaseCallbackHandler):
     def __init__(self):
         super().__init__()
-        self.results = []  # List of dicts: {"tokens": int, "cost": float}
+        self.total_tokens = 0
+        self.total_cost = 0.0
+        self.prefix_tokens = 13
 
     def _get_model_name(self, kwargs):
         return kwargs.get("invocation_params", {}).get("model_name")
@@ -57,6 +59,12 @@ class LoggingHandler(BaseCallbackHandler):
 
         for em in messages:
             for message in em:
+                if isinstance(message, SystemMessage):
+                    text = message.content
+                    tokens = calculate_text_tokens(model_name=model_name, text=text)
+                    self.total_tokens += tokens
+                    continue
+
                 if isinstance(message, HumanMessage):
                     for content in message.content:
                         if isinstance(content, dict) and "image_url" in content:
@@ -76,9 +84,13 @@ class LoggingHandler(BaseCallbackHandler):
                                         f"[Simulated] Tokens: {tokens}, Cost: ${cost:.4f}"
                                     )
 
-                                    self.results.append(
-                                        {"tokens": tokens, "cost": cost}
-                                    )
+                                    self.total_tokens += tokens
+        self.total_tokens += self.prefix_tokens
+        self.total_cost = calculate_cost(
+            input_tokens=self.total_tokens,
+            output_tokens=0,
+            config=openai_config[model_name],
+        )
 
 
 def simulate_image_token_cost(llm, messages: list[BaseMessage]):
@@ -101,103 +113,4 @@ def simulate_image_token_cost(llm, messages: list[BaseMessage]):
         # print(f"[Simulate] Tokens: {e.tokens}, Cost: ${e.cost:.4f}")
         return {"tokens": 0, "cost": 0.0}
 
-    if handler.results:
-        total_cost = 0
-        total_tokens = 0
-        for token_result in handler.results:
-            total_cost += token_result["cost"]
-            total_tokens += token_result["tokens"]
-
-        handler.results.append({"total_tokens": total_tokens, "total_cost": total_cost})
-        return handler.results
-    else:
-        return {"tokens": 0, "cost": 0.0}
-
-
-def func_test():
-    llm = ChatOpenAI(model="gpt-4.1-nano")
-
-    path = str(Path("tests") / "image_folder" / "kitten.jpg")
-
-    # response = llm.invoke("What is the capital of France?", config={"callbacks": callbacks})
-    with open(path, "rb") as image_file:
-        image_bytes = image_file.read()
-        image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-
-    image_data_url = f"data:image/jpeg;base64,{image_base64}"
-
-    messages = [
-        SystemMessage(content="You are a helpful assistant."),
-        HumanMessage(
-            content=[
-                {"type": "image_url", "image_url": {"url": image_data_url}},
-            ],
-        ),
-    ]
-
-    result = simulate_image_token_cost(llm, messages)
-
-    print(result)
-
-
-def func_test_all_images():
-    llm = ChatOpenAI(model="gpt-4.1-nano")
-    image_folder = Path("tests/image_folder")
-
-    image_files = (
-        list(image_folder.glob("*.jpg"))
-        + list(image_folder.glob("*.jpeg"))
-        + list(image_folder.glob("*.png"))
-    )
-
-    for image_path in image_files:
-        with open(image_path, "rb") as image_file:
-            image_bytes = image_file.read()
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-            image_data_url = f"data:image/jpeg;base64,{image_base64}"
-
-        messages = [
-            SystemMessage(content="You are a helpful assistant."),
-            HumanMessage(
-                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
-            ),
-        ]
-
-    result = simulate_image_token_cost(llm, messages)
-
-    print(result)
-
-
-def func_test_all_images_one_list():
-    llm = ChatOpenAI(model="gpt-4.1-nano")
-    image_folder = Path("tests/image_folder")
-
-    image_files = (
-        list(image_folder.glob("*.jpg"))
-        + list(image_folder.glob("*.jpeg"))
-        + list(image_folder.glob("*.png"))
-    )
-
-    messages = [
-        SystemMessage(content="You are a helpful assistant."),
-    ]
-    for image_path in image_files:
-        with open(image_path, "rb") as image_file:
-            image_bytes = image_file.read()
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
-            image_data_url = f"data:image/jpeg;base64,{image_base64}"
-
-        messages.append(
-            HumanMessage(
-                content=[{"type": "image_url", "image_url": {"url": image_data_url}}]
-            )
-        )
-    result = simulate_image_token_cost(llm, messages)
-
-    print(result)
-
-
-if __name__ == "__main__":
-    func_test()
-    func_test_all_images()
-    func_test_all_images_one_list()
+    return {"tokens": handler.total_tokens, "cost": round(handler.total_cost, 5)}

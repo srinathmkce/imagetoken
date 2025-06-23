@@ -21,7 +21,7 @@ openai_config = {
         "factor": 1.72,
         "max_tokens": 128000,
         "input_tokens": 0.15,
-        "output_tokens": 0.60
+        "output_tokens": 0.60,
     },
     "gpt-4o": {
         "factor": 1.72,

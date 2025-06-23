@@ -1,4 +1,46 @@
 import math
+import tiktoken
+from image_token.config import patch_models, tile_models
+
+
+def calculate_text_tokens(model_name: str, text: str):
+    enc = tiktoken.encoding_for_model("gpt-4o")
+    tokens = enc.encode(text)
+    num_tokens = len(tokens)
+    return num_tokens
+
+
+def calculate_image_tokens(
+    model_name: str, width: int, height: int, max_tokens: int, model_config: dict
+):
+    """
+    Calculate the number of tokens for an image based on the model configuration.
+
+    Args:
+        model_name (str): The name of the model.
+        width (int): The width of the image.
+        height (int): The height of the image.
+        max_tokens (int): The maximum number of tokens for the model.
+        model_config (dict): The configuration for the model.
+
+    Returns:
+        int: The number of tokens for the image.
+    """
+    if model_name in patch_models:
+        num_tokens = calculate_image_tokens_patch(
+            width=width, height=height, max_tokens=max_tokens
+        )
+        return int(num_tokens * model_config["factor"])
+
+    elif model_name in tile_models:
+        num_tokens = calculate_image_tokens_tile(
+            width=width, height=height, tile_models=tile_models, model_name=model_name
+        )
+        return num_tokens
+    else:
+        raise ValueError(
+            f"Model {model_name} is not supported for image token calculation."
+        )
 
 
 def calculate_image_tokens_patch(width, height, max_tokens=1536, patch_size=32):
@@ -55,6 +97,7 @@ def calculate_image_tokens_patch(width, height, max_tokens=1536, patch_size=32):
     # Final token count is number of patches
     return final_patches_w * final_patches_h
 
+
 def calculate_image_tokens_tile(width, height, tile_models, model_name, tile_size=512):
     """Calculate the number of image tokens.m
 
@@ -66,7 +109,7 @@ def calculate_image_tokens_tile(width, height, tile_models, model_name, tile_siz
         tile_models (dict): A dictionary containing tile model configurations.
         model_name (str): The name of the model to use for token calculation.
         tile_size (int, optional): The size of each tile. Defaults to 512.
-    
+
     Returns:
         int: The calculated number of image tokens.
 

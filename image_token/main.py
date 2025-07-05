@@ -5,11 +5,13 @@ from image_token.validate import (
     check_allowed_extensions,
     check_valid_model,
 )
-from image_token.utils import read_image_dims, calculate_cost, list_all_images
+from image_token.utils import read_image_dims, calculate_cost, list_all_images , save_image_from_url , is_url
 from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
+from urllib.parse import urlparse
+
 
 
 def process_image(path: str, model_config: dict, model_name: str = None):
@@ -75,6 +77,20 @@ def get_cost(
     return cost
 
 
+def process_image_from_url(url: str, model_config: dict, model_name: str = None) -> int:
+    """
+    Process an image from a URL and calculate the number of tokens.
+
+    Args:
+        url (str): URL of the image.
+        model_config (dict): The configuration for the model.
+
+    Returns:
+        int: The number of tokens in the image.
+    """
+    path = save_image_from_url(url)
+    return process_image(path, model_config, model_name)
+
 def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str = None):
     """
     Calculate and return the total number of tokens for a given image or directory of images.
@@ -94,32 +110,40 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
         int: The total number of tokens calculated.
     """
 
-    check_if_file_or_folder_exists(path=path)
     check_valid_model(model_name=model_name)
     model_config = openai_config[model_name]
     result_dict = {}
     total_tokens = 0
 
-    if check_if_path_is_file(path=path):
+    if is_url(path):
+        image_path = save_image_from_url(path)
         num_tokens = process_image(
-            path=path, model_config=model_config, model_name=model_name
+            path=image_path, model_config=model_config, model_name=model_name
         )
         total_tokens = num_tokens + prefix_tokens
-        # print("Total number of tokens: ", total_tokens)
         result_dict[path] = total_tokens
-    else:
-        image_files = list_all_images(path=path)
-        total_tokens = 0
-        for image_path in tqdm(image_files):
-            num_tokens = process_image(
-                path=image_path, model_config=model_config, model_name=model_name
-            )
-            total_tokens += num_tokens + prefix_tokens
-            # print(f"Total number of tokens for {image_path}: ", num_tokens + prefix_tokens)
-            result_dict[image_path] = num_tokens + prefix_tokens
 
-    if save_to:
-        with open(save_to, "w") as f:
-            json.dump(result_dict, f, indent=4)
+    else:
+        check_if_file_or_folder_exists(path=path)
+
+        if check_if_path_is_file(path=path):
+            num_tokens = process_image(
+                path=path, model_config=model_config, model_name=model_name
+            )
+            total_tokens = num_tokens + prefix_tokens
+            result_dict[path] = total_tokens
+
+        else:
+            image_files = list_all_images(path=path)
+            for image_path in tqdm(image_files):
+                num_tokens = process_image(
+                    path=image_path, model_config=model_config, model_name=model_name
+                )
+                total_tokens += num_tokens + prefix_tokens
+                result_dict[image_path] = num_tokens + prefix_tokens
+
+        if save_to:
+            with open(save_to, "w") as f:
+                json.dump(result_dict, f, indent=4)
 
     return total_tokens

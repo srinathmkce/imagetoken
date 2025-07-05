@@ -37,6 +37,12 @@ from image_token import get_cost
 cost = get_cost(model_name="gpt-4.1-nano", system_prompt_tokens=300 * 100, approx_output_tokens=100 * 100, path=r"image_folder")
 ```
 
+To get the number of tokens for a URL
+```python
+from image_token import get_token
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://static.vecteezy.com/system/resources/thumbnails/002/098/203/small/silver-tabby-cat-sitting-on-green-background-free-photo.jpg")
+```
+
 ## Langchain integration
 
 You can simulate the langchain OpenAI call and calculate the input token and cost

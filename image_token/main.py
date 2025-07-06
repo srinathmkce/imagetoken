@@ -5,13 +5,14 @@ from image_token.validate import (
     check_allowed_extensions,
     check_valid_model,
 )
-from image_token.utils import read_image_dims, calculate_cost, list_all_images , save_image_from_url , is_url
+from image_token.utils import read_image_dims, calculate_cost, list_all_images , get_image_dimensions_from_bytes , is_url
 from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
-from urllib.parse import urlparse
-
+import requests
+from image_token.caching_utils import get_cached_dimensions , cache_dimensions
+# import time
 
 
 def process_image(path: str, model_config: dict, model_name: str = None):
@@ -38,6 +39,39 @@ def process_image(path: str, model_config: dict, model_name: str = None):
         max_tokens=max_tokens,
         model_config=model_config,
     )
+
+    return num_tokens
+
+def process_image_from_url(url: str, model_config: dict, model_name: str = None) -> int:
+    """
+    Process an image from a URL and calculate number of tokens, using persistent dimension cache.
+    
+    """
+    # start = time.time()
+
+
+    dimensions = get_cached_dimensions(url)
+
+    if dimensions:
+        print("Using cached Dimension")
+        width, height = dimensions
+    else:
+        response = requests.get(url)
+        response.raise_for_status()
+
+        image_bytes = response.content
+        width, height = get_image_dimensions_from_bytes(image_bytes)
+        cache_dimensions(url, width, height)
+
+    num_tokens = calculate_image_tokens(
+        model_name=model_name,
+        width=width,
+        height=height,
+        max_tokens=model_config["max_tokens"],
+        model_config=model_config,
+    )
+    # end = time.time()
+    # print("Token calc time:", end - start)
 
     return num_tokens
 
@@ -77,20 +111,6 @@ def get_cost(
     return cost
 
 
-def process_image_from_url(url: str, model_config: dict, model_name: str = None) -> int:
-    """
-    Process an image from a URL and calculate the number of tokens.
-
-    Args:
-        url (str): URL of the image.
-        model_config (dict): The configuration for the model.
-
-    Returns:
-        int: The number of tokens in the image.
-    """
-    path = save_image_from_url(url)
-    return process_image(path, model_config, model_name)
-
 def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str = None):
     """
     Calculate and return the total number of tokens for a given image or directory of images.
@@ -116,10 +136,7 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
     total_tokens = 0
 
     if is_url(path):
-        image_path = save_image_from_url(path)
-        num_tokens = process_image(
-            path=image_path, model_config=model_config, model_name=model_name
-        )
+        num_tokens = process_image_from_url(url=path , model_config=model_config, model_name=model_name)
         total_tokens = num_tokens + prefix_tokens
         result_dict[path] = total_tokens
 

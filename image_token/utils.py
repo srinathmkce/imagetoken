@@ -1,8 +1,8 @@
 import os
 from PIL import Image
-import requests
 from urllib.parse import urlparse
-from uuid import uuid4
+from io import BytesIO
+from PIL import Image
 
 
 def read_image_dims(path: str) -> tuple[int, int]:
@@ -76,28 +76,6 @@ def is_url(path: str) -> bool:
 
 
 
-def save_image_from_url(url: str, save_dir: str = "Downloaded") -> str:
-    """
-    Download an image from a URL and save it locally.
-
-    Args:
-        url (str): URL of the image.
-        save_dir (str): Directory to save the image.
-
-    Returns:
-        str: Path to the saved image file.
-    """
-    save_dir = os.path.abspath(save_dir)  # Convert to absolute path
-    os.makedirs(save_dir, exist_ok=True)
-    parsed = urlparse(url)
-    ext = os.path.splitext(parsed.path)[1] or ".jpg"  # Default to .jpg
-    filename = f"{uuid4().hex}{ext}"
-    path = os.path.join(save_dir, filename)
-
-    response = requests.get(url)
-    response.raise_for_status()
-
-    with open(path, "wb") as f:
-        f.write(response.content)
-
-    return path
+def get_image_dimensions_from_bytes(image_bytes: bytes) -> tuple[int, int]:
+    with Image.open(BytesIO(image_bytes)) as img:
+        return img.size

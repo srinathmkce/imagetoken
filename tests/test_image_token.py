@@ -2,6 +2,7 @@ import pytest
 import tempfile
 import os
 import json
+import asyncio
 from PIL import Image
 from tempfile import NamedTemporaryFile
 from image_token import get_token
@@ -119,3 +120,19 @@ def test_get_token_on_resized_images(width, height):
         assert tokens == expected_tokens, f"Token count mismatch for ({width}x{height})"
     finally:
         os.remove(tmp_path)
+
+@pytest.mark.asyncio
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
+async def test_get_token_async(model_name):
+    """
+    Test asynchronous token calculation using get_token with method='async'.
+    This ensures the async implementation works as expected.
+    """
+    tokens = await asyncio.to_thread(
+        get_token,
+        model_name=model_name,
+        path=JPG_FILE_PATH,
+        method="async"
+    )
+    assert isinstance(tokens, int), f"Expected token count to be int, got {type(tokens)}"
+    assert tokens > 0, f"Token count should be positive, got {tokens}"

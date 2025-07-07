@@ -22,13 +22,20 @@ pip install image-token
 To get the number of tokens for a single image
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"kitten.jpg")
+# For sync operation
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"kitten.jpg", method="sync")
+# For async operation
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"kitten.jpg", method="async")
+
 ```
 
 To get the number of tokens for a directory of images
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
+# For sync operation
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder", method="sync")
+# For async operation
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder", method="async")
 ```
 
 To get the estimated cost of generating text from an image or directory of images

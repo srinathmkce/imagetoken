@@ -2,42 +2,51 @@ from image_token.utils import calculate_cost
 from image_token.config import openai_config
 import asyncio
 from image_token.get_tokens import GetTokens
+from image_token.get_cost_ import get_cost_async_input_tokens
 from pathlib import Path
 
 
 def get_cost(
-    model_name: str,
-    system_prompt_tokens: int,
-    approx_output_tokens: int,
-    path: Path | str,
-    save_to: str = None,
-    prefix_tokens: int = 9,
-):
+        model_name: str,
+        system_prompt_tokens: int,
+        approx_output_tokens: int,
+        path: str | Path,
+        save_to: str = None,
+        prefix_tokens: int = 9,
+        method: str = "sync",
+    ) -> float:
     """
-    Calculate and return the estimated cost of generating text from an image or directory of images.
+    Calculate and return the estimated cost of processing an image or directory of images.
 
     Args:
         model_name (str): The name of the model to use.
-        system_prompt_tokens (int): The number of tokens in the system prompt.
-        approx_output_tokens (int): The approximate number of tokens in the output.
-        path (str): The path to the image file or directory of images.
-        save_to (str): The path to save the output to.
-        prefix_tokens (int): The number of prefix tokens to use. Defaults to 9.
+        system_prompt_tokens (int): Tokens used in the system prompt.
+        approx_output_tokens (int): Estimated number of tokens in the model's output.
+        path (str | Path): Path to an image or folder.
+        save_to (str, optional): Path to store token output. Default: None.
+        prefix_tokens (int, optional): Extra prefix tokens to include. Default: 9.
+        method (str, optional): Choose between 'sync' or 'async'. Default: 'sync'.
 
     Returns:
-        float: The estimated cost in dollars.
+        float: Estimated cost in USD.
     """
 
-    model_config = openai_config[model_name]
-    input_tokens = get_token(
-        model_name=model_name, path=path, prefix_tokens=prefix_tokens, save_to=save_to
-    )
-    cost = calculate_cost(
+    if method == "sync":
+        obj = GetTokens(model_name, path, prefix_tokens, save_to)
+        input_tokens = obj.get_token_sync()
+    elif method == "async":
+        input_tokens = asyncio.run(get_cost_async_input_tokens(
+            model_name, path, prefix_tokens, save_to
+        ))
+    else:
+        raise ValueError("method must be 'sync' or 'async'")
+
+    config = openai_config[model_name]
+    return calculate_cost(
         input_tokens=system_prompt_tokens + input_tokens,
         output_tokens=approx_output_tokens,
-        config=model_config,
+        config=config,
     )
-    return cost
 
 
 def get_token(

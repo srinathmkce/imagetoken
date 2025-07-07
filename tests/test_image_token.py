@@ -134,5 +134,6 @@ async def test_get_token_async(model_name):
         path=JPG_FILE_PATH,
         method="async"
     )
+    print(f"[ASYNC] Tokens for {model_name}: {tokens}")
     assert isinstance(tokens, int), f"Expected token count to be int, got {type(tokens)}"
     assert tokens > 0, f"Token count should be positive, got {tokens}"

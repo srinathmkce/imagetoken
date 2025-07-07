@@ -91,6 +91,7 @@ class GetTokens:
             with open(self.save_to, "w") as f:
                 json.dump(result_dict, f, indent=4)
 
+        print(f"Total tokens calculated: {total_tokens}")
         return total_tokens
 
     async def get_token_async(self) -> int:

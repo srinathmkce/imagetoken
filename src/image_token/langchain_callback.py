@@ -1,7 +1,5 @@
 from langchain_core.callbacks import BaseCallbackHandler
-from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage, BaseMessage
-from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
@@ -109,7 +107,7 @@ def simulate_image_token_cost(llm, messages: list[BaseMessage]):
         handler.on_chat_model_start(
             {}, [messages], invocation_params={"model_name": model_name}
         )
-    except Exception as e:
+    except Exception:
         # print(f"[Simulate] Tokens: {e.tokens}, Cost: ${e.cost:.4f}")
         return {"tokens": 0, "cost": 0.0}
 

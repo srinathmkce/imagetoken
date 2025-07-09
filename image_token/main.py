@@ -1,18 +1,21 @@
 import json
 from image_token.validate import (
-    check_if_file_or_folder_exists,
     check_if_path_is_file,
+    check_if_path_is_folder,
     check_allowed_extensions,
     check_valid_model,
+    is_url,
 )
-from image_token.utils import read_image_dims, calculate_cost, list_all_images , get_image_dimensions_from_bytes , is_url
+from image_token.utils import (
+    read_image_dims,
+    calculate_cost,
+    list_all_images,
+    process_image_from_url,
+)
 from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
-import requests
-from image_token.caching_utils import get_cached_dimensions , cache_dimensions
-# import time
 
 
 def process_image(path: str, model_config: dict, model_name: str = None):
@@ -39,39 +42,6 @@ def process_image(path: str, model_config: dict, model_name: str = None):
         max_tokens=max_tokens,
         model_config=model_config,
     )
-
-    return num_tokens
-
-def process_image_from_url(url: str, model_config: dict, model_name: str = None) -> int:
-    """
-    Process an image from a URL and calculate number of tokens, using persistent dimension cache.
-    
-    """
-    # start = time.time()
-
-
-    dimensions = get_cached_dimensions(url)
-
-    if dimensions:
-        print("Using cached Dimension")
-        width, height = dimensions
-    else:
-        response = requests.get(url)
-        response.raise_for_status()
-
-        image_bytes = response.content
-        width, height = get_image_dimensions_from_bytes(image_bytes)
-        cache_dimensions(url, width, height)
-
-    num_tokens = calculate_image_tokens(
-        model_name=model_name,
-        width=width,
-        height=height,
-        max_tokens=model_config["max_tokens"],
-        model_config=model_config,
-    )
-    # end = time.time()
-    # print("Token calc time:", end - start)
 
     return num_tokens
 
@@ -135,32 +105,34 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
     result_dict = {}
     total_tokens = 0
 
-    if is_url(path):
-        num_tokens = process_image_from_url(url=path , model_config=model_config, model_name=model_name)
+    if check_if_path_is_file(path=path):
+        num_tokens = process_image(
+            path=path, model_config=model_config, model_name=model_name
+        )
         total_tokens = num_tokens + prefix_tokens
         result_dict[path] = total_tokens
-
-    else:
-        check_if_file_or_folder_exists(path=path)
-
-        if check_if_path_is_file(path=path):
+    elif check_if_path_is_folder(path=path):
+        image_files = list_all_images(path=path)
+        total_tokens = 0
+        for image_path in tqdm(image_files):
             num_tokens = process_image(
-                path=path, model_config=model_config, model_name=model_name
+                path=image_path, model_config=model_config, model_name=model_name
             )
-            total_tokens = num_tokens + prefix_tokens
-            result_dict[path] = total_tokens
+            total_tokens += num_tokens + prefix_tokens
+            result_dict[image_path] = num_tokens + prefix_tokens
+    elif is_url(path=path):
+        num_tokens = process_image_from_url(
+            url=path, model_config=model_config, model_name=model_name
+        )
+        total_tokens = num_tokens + prefix_tokens
+        result_dict[path] = total_tokens
+    else:
+        raise ValueError(
+            f"Invalid input path or URL: '{path}'. The given input is not a valid file, folder, or URL."
+        )
 
-        else:
-            image_files = list_all_images(path=path)
-            for image_path in tqdm(image_files):
-                num_tokens = process_image(
-                    path=image_path, model_config=model_config, model_name=model_name
-                )
-                total_tokens += num_tokens + prefix_tokens
-                result_dict[image_path] = num_tokens + prefix_tokens
-
-        if save_to:
-            with open(save_to, "w") as f:
-                json.dump(result_dict, f, indent=4)
+    if save_to:
+        with open(save_to, "w") as f:
+            json.dump(result_dict, f, indent=4)
 
     return total_tokens

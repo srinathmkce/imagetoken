@@ -1,5 +1,6 @@
 import os
 from image_token.config import openai_config
+from urllib.parse import urlparse
 
 
 def check_if_file_or_folder_exists(path: str):
@@ -32,10 +33,29 @@ def check_if_path_is_file(path: str):
     Returns:
         bool: True if the path is a file, False otherwise
     """
+    return os.path.isfile(path)
+
+
+def check_if_path_is_folder(path: str) -> bool:
+    """
+    Checks if the given path is a folder (directory).
+
+    Args:
+        path (str): The path to check
+
+    Returns:
+        bool: True if the path is a folder, False otherwise
+    """
     if os.path.isdir(path):
-        return False
-    else:
         return True
+    else:
+        return False
+
+
+def is_url(path: str) -> bool:
+    """Check if a given path is a valid URL."""
+    parsed = urlparse(path)
+    return parsed.scheme in ("http", "https")
 
 
 def check_allowed_extensions(path: str):

@@ -5,7 +5,7 @@ from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
-from image_token.core import calculate_image_tokens, calculate_text_tokens 
+from image_token.core import calculate_image_tokens, calculate_text_tokens
 from image_token.main import process_image_from_url
 from image_token.config import openai_config
 from image_token.utils import calculate_cost
@@ -37,12 +37,12 @@ class LoggingHandler(BaseCallbackHandler):
             return image.size
         except Exception:
             return None
-    
-    def _process_image_from_url(self , url , model_name ):
+
+    def _process_image_from_url(self, url, model_name):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-        return process_image_from_url(url , model_config , model_name)
+        return process_image_from_url(url, model_config, model_name)
 
     def _calculate_image_tokens(self, model_name, width, height):
         model_config = self._get_model_config(model_name)
@@ -94,14 +94,15 @@ class LoggingHandler(BaseCallbackHandler):
 
                                     self.total_tokens += tokens
                             elif image_url and image_url.startswith("https"):
-                                print("indied")
-                                tokens = self._process_image_from_url(image_url,model_name)
+                                tokens = self._process_image_from_url(
+                                    image_url, model_name
+                                )
                                 print(tokens)
                                 cost = self._calculate_approx_input_cost(
-                                    model_name , tokens
+                                    model_name, tokens
                                 )
                                 print(
-                                        f"[Simulated] Tokens: {tokens}, Cost: ${cost:.4f}"
+                                    f"[Simulated] Tokens: {tokens}, Cost: ${cost:.4f}"
                                 )
                                 self.total_tokens += tokens
 

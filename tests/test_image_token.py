@@ -10,6 +10,9 @@ from conftest import (
     JPG_FILE_PATH,
     JPEG_FILE_PATH,
     PNG_FILE_PATH,
+    JPG_URL,
+    JPEG_URL,
+    PNG_URL,
     GPT_4_1_MINI_MODEL_NAME,
     GPT_4_1_NANO_MODEL_NAME,
     MODEL_NAMES,
@@ -59,6 +62,22 @@ def test_multiple_fomat(model_name):
     )
     assert (
         get_token(model_name=model_name, path=PNG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
+    )
+
+
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
+def test_multiple_fomat_url(model_name):
+    assert (
+        get_token(model_name=model_name, path=JPG_URL)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=JPEG_URL)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPEG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=PNG_URL)
         == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
     )
 

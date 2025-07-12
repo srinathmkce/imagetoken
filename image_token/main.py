@@ -5,6 +5,7 @@ from image_token.validate import (
     check_allowed_extensions,
     check_valid_model,
     is_url,
+    is_multiple_urls
 )
 from image_token.utils import (
     read_image_dims,
@@ -16,6 +17,7 @@ from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
+from image_token.caching_utils import ImageDimensionCache
 
 
 def process_image(path: str, model_config: dict, model_name: str = None):
@@ -81,7 +83,7 @@ def get_cost(
     return cost
 
 
-def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str = None):
+def get_token(model_name: str, path: str, prefix_tokens: int = 9 , save_to: str = None ):
     """
     Calculate and return the total number of tokens for a given image or directory of images.
 
@@ -121,11 +123,27 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
             total_tokens += num_tokens + prefix_tokens
             result_dict[image_path] = num_tokens + prefix_tokens
     elif is_url(path=path):
-        num_tokens = process_image_from_url(
-            url=path, model_config=model_config, model_name=model_name
+        with ImageDimensionCache() as cache:
+            num_tokens = process_image_from_url(
+            url=path,
+            model_config=model_config,
+            model_name=model_name,
+            cache = cache
         )
         total_tokens = num_tokens + prefix_tokens
         result_dict[path] = total_tokens
+    elif is_multiple_urls(urls = path):
+        with ImageDimensionCache() as cache:
+            for url in path : 
+                num_tokens = process_image_from_url(
+                    url = url,
+                    model_name=model_name,
+                    model_config=model_config,
+                    cache=cache
+                )
+                print(num_tokens)
+                total_tokens += num_tokens + prefix_tokens
+                result_dict[url] = num_tokens + prefix_tokens
     else:
         raise ValueError(
             f"Invalid input path or URL: '{path}'. The given input is not a valid file, folder, or URL."

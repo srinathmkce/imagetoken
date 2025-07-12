@@ -32,8 +32,13 @@ def check_if_path_is_file(path: str):
 
     Returns:
         bool: True if the path is a file, False otherwise
+        
     """
-    return os.path.isfile(path)
+    try :
+        return os.path.isfile(path)
+    except:
+        return False
+    # return os.path.isfile(path)
 
 
 def check_if_path_is_folder(path: str) -> bool:
@@ -46,17 +51,21 @@ def check_if_path_is_folder(path: str) -> bool:
     Returns:
         bool: True if the path is a folder, False otherwise
     """
-    if os.path.isdir(path):
-        return True
-    else:
+    try :
+        return os.path.isdir(path)
+    except:
         return False
 
 
 def is_url(path: str) -> bool:
     """Check if a given path is a valid URL."""
-    parsed = urlparse(path)
-    return parsed.scheme in ("http", "https")
-
+    # parsed = urlparse(path)
+    # return parsed.scheme in ("http", "https")
+    try:
+        parsed = urlparse(path)
+        return parsed.scheme in ("http", "https")
+    except:
+        return False
 
 def check_allowed_extensions(path: str):
     """
@@ -94,3 +103,17 @@ def check_valid_model(model_name: str):
         )
     else:
         return True
+
+def is_multiple_urls(urls) -> bool:
+    """
+
+    Checks if multiple urls are passed
+
+    """
+    try:
+        if (len(urls) > 0 and is_url(urls[0])):
+            return True
+        else : 
+            return False
+    except:
+        return False

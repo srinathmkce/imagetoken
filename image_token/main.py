@@ -141,7 +141,6 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9 , save_to: str 
                     model_config=model_config,
                     cache=cache
                 )
-                print(num_tokens)
                 total_tokens += num_tokens + prefix_tokens
                 result_dict[url] = num_tokens + prefix_tokens
     else:

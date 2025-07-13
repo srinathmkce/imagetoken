@@ -10,6 +10,7 @@ from image_token.main import process_image_from_url
 from image_token.config import openai_config
 from image_token.utils import calculate_cost
 from urllib.parse import urlparse
+from image_token.caching_utils import ImageDimensionCache
 
 
 from dotenv import load_dotenv
@@ -42,7 +43,8 @@ class LoggingHandler(BaseCallbackHandler):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-        return process_image_from_url(url, model_config, model_name)
+        with ImageDimensionCache() as cache:
+            return process_image_from_url(url, model_config=model_config, model_name=model_name,cache=cache)
 
     def _calculate_image_tokens(self, model_name, width, height):
         model_config = self._get_model_config(model_name)
@@ -97,7 +99,6 @@ class LoggingHandler(BaseCallbackHandler):
                                 tokens = self._process_image_from_url(
                                     image_url, model_name
                                 )
-                                print(tokens)
                                 cost = self._calculate_approx_input_cost(
                                     model_name, tokens
                                 )

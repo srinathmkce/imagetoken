@@ -34,15 +34,15 @@ num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
 To get the number of tokens for a URL
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://drive.usercontent.google.com/download?id=1iNJTKFYyW09lVStpWqdSfKjw3ktEc215&export=download&authuser=1&confirm=t&uuid=acc70c89-fcb3-451a-9700-2e59e2a3e46a&at=AN8xHoqd_Asknqn8z-dpjPbB1HJO:1752041579483")
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true")
 ```
 
 To get the number of token for multiple URLS
 ```python
 for image_token import get_token
-urls = ["https://drive.usercontent.google.com/download?id=1iNJTKFYyW09lVStpWqdSfKjw3ktEc215&export=download&authuser=1&confirm=t&uuid=acc70c89-fcb3-451a-9700-2e59e2a3e46a&at=AN8xHoqd_Asknqn8z-dpjPbB1HJO:1752041579483"
-,"https://drive.usercontent.google.com/download?id=1cdTsrL3HDpXvADHHNxEOMtVP2wGNjszm&export=download&authuser=1&confirm=t&uuid=784dad7a-5ec6-4d2e-9604-2e22efb1f049&at=AN8xHorOo7QTvxOmxt4OBedxv49N:1752041386063"
-,"https://drive.usercontent.google.com/download?id=1GQ0MG6XGeH7Rn0gGX1z47cYfk-tsLIJT&export=download&authuser=1&confirm=t&uuid=bb4292d1-43cd-4891-a39b-8ad225cbf105&at=AN8xHoptjBYOR2OMy5OQgJe24RRr:1752041516513"
+urls = ["https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true"
+,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpg?raw=true"
+,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
 ]
 num_tokens = get_token(model_name="gpt-4.1-mini",path=urls)
 ```
@@ -86,6 +86,35 @@ messages = [
 result = simulate_image_token_cost(llm, messages)
 
 print(result)
+
+```
+
+You can simulate the langchain OpenAI call and calculate the input token and cost using URL
+```python
+
+import base64
+from pathlib import Path
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+from image_token import simulate_image_token_cost
+
+llm = ChatOpenAI(model="gpt-4.1-nano")
+
+image_data_url = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+
+messages = [
+    SystemMessage(content="You are a helpful assistant."),
+    HumanMessage(
+        content=[
+            {"type": "image_url", "image_url": {"url": image_data_url}},
+        ],
+    ),
+]
+
+result = simulate_image_token_cost(llm, messages)
+
+print(result)
+
 
 ```
 

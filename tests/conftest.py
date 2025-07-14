@@ -4,10 +4,10 @@ from pathlib import Path
 JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
 JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
 PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
-JPEG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true"
-JPG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpg?raw=true"
-PNG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
-CACHE_TEST_IMAGE_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+JPEG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
+JPG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
+PNG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+CACHE_TEST_IMAGE_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 
 GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
 GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"

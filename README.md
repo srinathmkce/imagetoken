@@ -34,15 +34,15 @@ num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
 To get the number of tokens for a URL
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true")
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg")
 ```
 
 To get the number of token for multiple URLS
 ```python
 for image_token import get_token
-urls = ["https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true"
-,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpg?raw=true"
-,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+urls = ["https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
+,"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
+,"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 ]
 num_tokens = get_token(model_name="gpt-4.1-mini",path=urls)
 ```
@@ -100,7 +100,7 @@ from image_token import simulate_image_token_cost
 
 llm = ChatOpenAI(model="gpt-4.1-nano")
 
-image_data_url = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+image_data_url = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
 
 messages = [
     SystemMessage(content="You are a helpful assistant."),

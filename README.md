@@ -31,6 +31,22 @@ from image_token import get_token
 num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
 ```
 
+To get the number of tokens for a URL
+```python
+from image_token import get_token
+num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true")
+```
+
+To get the number of token for multiple URLS
+```python
+for image_token import get_token
+urls = ["https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true"
+,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpg?raw=true"
+,"https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+]
+num_tokens = get_token(model_name="gpt-4.1-mini",path=urls)
+```
+
 To get the estimated cost of generating text from an image or directory of images
 ```python
 from image_token import get_cost
@@ -70,6 +86,35 @@ messages = [
 result = simulate_image_token_cost(llm, messages)
 
 print(result)
+
+```
+
+You can simulate the langchain OpenAI call and calculate the input token and cost using URL
+```python
+
+import base64
+from pathlib import Path
+from langchain_openai import ChatOpenAI
+from langchain_core.messages import HumanMessage, SystemMessage
+from image_token import simulate_image_token_cost
+
+llm = ChatOpenAI(model="gpt-4.1-nano")
+
+image_data_url = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+
+messages = [
+    SystemMessage(content="You are a helpful assistant."),
+    HumanMessage(
+        content=[
+            {"type": "image_url", "image_url": {"url": image_data_url}},
+        ],
+    ),
+]
+
+result = simulate_image_token_cost(llm, messages)
+
+print(result)
+
 
 ```
 

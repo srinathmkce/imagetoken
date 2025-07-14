@@ -10,12 +10,22 @@ from conftest import (
     JPG_FILE_PATH,
     JPEG_FILE_PATH,
     PNG_FILE_PATH,
+    JPG_URL,
+    JPEG_URL,
+    PNG_URL,
+    CACHE_TEST_IMAGE_URL,
     GPT_4_1_MINI_MODEL_NAME,
     GPT_4_1_NANO_MODEL_NAME,
     MODEL_NAMES,
     EXPECTED_OUTPUT_TOKENS,
     test_cases,
+    test_inputs
 )
+from image_token.config import openai_config
+from image_token.main import process_image_from_url
+from image_token.caching_utils import ImageDimensionCache
+import time
+from image_token.validate import check_if_path_is_file , check_if_path_is_folder , is_url , is_multiple_urls
 
 
 def test_invalid_file_path():
@@ -61,6 +71,23 @@ def test_multiple_fomat(model_name):
         get_token(model_name=model_name, path=PNG_FILE_PATH)
         == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
     )
+
+
+@pytest.mark.parametrize("model_name", MODEL_NAMES)
+def test_multiple_fomat_url(model_name):
+    assert (
+        get_token(model_name=model_name, path=JPG_URL)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=JPEG_URL)
+        == EXPECTED_OUTPUT_TOKENS[model_name][JPEG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=PNG_URL)
+        == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
+    )
+
 
 
 @pytest.mark.parametrize("model_name", MODEL_NAMES)
@@ -119,3 +146,89 @@ def test_get_token_on_resized_images(width, height):
         assert tokens == expected_tokens, f"Token count mismatch for ({width}x{height})"
     finally:
         os.remove(tmp_path)
+
+def test_sqlite_based_image_cache():
+    config = openai_config["gpt-4.1-mini"]
+
+    with ImageDimensionCache() as cache_instance:
+        cache_instance.delete_dimensions(CACHE_TEST_IMAGE_URL)
+        assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is None
+
+        start_time = time.time()
+        tokens_1 = process_image_from_url(
+            url=CACHE_TEST_IMAGE_URL,
+            model_config=config,
+            cache=cache_instance,
+            model_name="gpt-4.1-mini"
+        )
+        duration_1 = time.time() - start_time
+        print(f"[First call] Duration without cache: {duration_1:.6f} seconds")
+
+        assert tokens_1 > 0
+        assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is not None
+
+        start_time = time.time()
+        tokens_2 = process_image_from_url(
+            url=CACHE_TEST_IMAGE_URL,
+            model_config=config,
+            cache=cache_instance,
+            model_name="gpt-4.1-mini"
+        )
+        duration_2 = time.time() - start_time
+        print(f"[Second call] Duration with cache: {duration_2:.10f} seconds")
+
+        assert tokens_2 == tokens_1
+        assert duration_2 < duration_1
+
+        cache_instance.delete_dimensions(CACHE_TEST_IMAGE_URL)
+        assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is None
+
+        start_time = time.time()
+        tokens_3 = process_image_from_url(
+            CACHE_TEST_IMAGE_URL,
+            model_config=config,
+            cache=cache_instance,
+            model_name="gpt-4.1-mini"
+        )
+        duration_3 = time.time() - start_time
+        print(f"[Third call after cache delete] Duration: {duration_3:.6f} seconds")
+
+        assert tokens_3 == tokens_1
+        assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is not None
+
+
+def test_check_if_path_is_file():
+    """Test check_if_path_is_file - only file should return True"""
+    assert check_if_path_is_file(test_inputs["file"]) == True
+    
+    for key in test_inputs:
+        if key != "file":
+            assert check_if_path_is_file(test_inputs[key]) == False
+
+
+def test_check_if_path_is_folder():
+    """Test check_if_path_is_folder - only folder should return True"""
+    assert check_if_path_is_folder(test_inputs["folder"]) == True
+    
+    for key in test_inputs:
+        if key != "folder": 
+            assert check_if_path_is_folder(test_inputs[key]) == False
+
+
+def test_is_url():
+    """Test is_url - only URL should return True"""
+    assert is_url(test_inputs["url"]) == True
+    
+
+    for key in test_inputs:
+        if key != "url": 
+            assert is_url(test_inputs[key]) == False
+
+
+def test_is_multiple_urls():
+    """Test is_multiple_urls - only URLs list should return True"""
+    assert is_multiple_urls(test_inputs["urls"]) == True
+    
+    for key in test_inputs:
+        if key != "urls":
+            assert is_multiple_urls(test_inputs[key]) == False

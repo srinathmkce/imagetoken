@@ -1,15 +1,23 @@
 import json
 from image_token.validate import (
-    check_if_file_or_folder_exists,
     check_if_path_is_file,
+    check_if_path_is_folder,
     check_allowed_extensions,
     check_valid_model,
+    is_url,
+    is_multiple_urls
 )
-from image_token.utils import read_image_dims, calculate_cost, list_all_images
+from image_token.utils import (
+    read_image_dims,
+    calculate_cost,
+    list_all_images,
+    process_image_from_url,
+)
 from image_token.core import calculate_image_tokens
 from image_token.config import openai_config
 from tqdm import tqdm
 from pathlib import Path
+from image_token.caching_utils import ImageDimensionCache
 
 
 def process_image(path: str, model_config: dict, model_name: str = None):
@@ -75,7 +83,7 @@ def get_cost(
     return cost
 
 
-def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str = None):
+def get_token(model_name: str, path: str, prefix_tokens: int = 9 , save_to: str = None ):
     """
     Calculate and return the total number of tokens for a given image or directory of images.
 
@@ -94,7 +102,6 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
         int: The total number of tokens calculated.
     """
 
-    check_if_file_or_folder_exists(path=path)
     check_valid_model(model_name=model_name)
     model_config = openai_config[model_name]
     result_dict = {}
@@ -105,9 +112,8 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
             path=path, model_config=model_config, model_name=model_name
         )
         total_tokens = num_tokens + prefix_tokens
-        # print("Total number of tokens: ", total_tokens)
         result_dict[path] = total_tokens
-    else:
+    elif check_if_path_is_folder(path=path):
         image_files = list_all_images(path=path)
         total_tokens = 0
         for image_path in tqdm(image_files):
@@ -115,8 +121,32 @@ def get_token(model_name: str, path: str, prefix_tokens: int = 9, save_to: str =
                 path=image_path, model_config=model_config, model_name=model_name
             )
             total_tokens += num_tokens + prefix_tokens
-            # print(f"Total number of tokens for {image_path}: ", num_tokens + prefix_tokens)
             result_dict[image_path] = num_tokens + prefix_tokens
+    elif is_url(path=path):
+        with ImageDimensionCache() as cache:
+            num_tokens = process_image_from_url(
+            url=path,
+            model_config=model_config,
+            model_name=model_name,
+            cache = cache
+        )
+        total_tokens = num_tokens + prefix_tokens
+        result_dict[path] = total_tokens
+    elif is_multiple_urls(urls = path):
+        with ImageDimensionCache() as cache:
+            for url in path : 
+                num_tokens = process_image_from_url(
+                    url = url,
+                    model_name=model_name,
+                    model_config=model_config,
+                    cache=cache
+                )
+                total_tokens += num_tokens + prefix_tokens
+                result_dict[url] = num_tokens + prefix_tokens
+    else:
+        raise ValueError(
+            f"Invalid input path or URL: '{path}'. The given input is not a valid file, folder, or URL."
+        )
 
     if save_to:
         with open(save_to, "w") as f:

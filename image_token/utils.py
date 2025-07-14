@@ -1,5 +1,10 @@
 import os
 from PIL import Image
+from io import BytesIO
+import requests
+from requests.exceptions import HTTPError , RequestException
+from image_token.caching_utils import ImageDimensionCache
+from image_token.core import calculate_image_tokens
 
 
 def read_image_dims(path: str) -> tuple[int, int]:
@@ -65,3 +70,58 @@ def calculate_cost(input_tokens: int, output_tokens: int, config: dict) -> float
     input_cost = (input_tokens / 10**6) * config["input_tokens"]
     output_cost = (output_tokens / 10**6) * config["output_tokens"]
     return input_cost + output_cost
+
+
+def get_image_dimensions_from_bytes(image_bytes: bytes) -> tuple[int, int]:
+    """
+    Reads the image bytes from request
+
+    Args:
+        input_bytes(int): The number of input tokens.
+
+    Returns:
+        tuple: [height , width].
+    """
+    try:
+        with Image.open(BytesIO(image_bytes)) as img:
+            return img.size
+    except Exception as e:
+        return None
+
+
+def process_image_from_url(url: str, model_config: dict, cache : ImageDimensionCache , model_name: str = None ) -> int:
+    """
+    Process an image from a URL and calculate number of tokens, using persistent dimension cache.
+
+    """
+    try :
+        dimensions = cache.get_cached_dimensions(url)
+
+        if dimensions:
+            width, height = dimensions
+        else:
+            response = requests.get(url)
+            response.raise_for_status()
+
+            image_bytes = response.content
+            width, height = get_image_dimensions_from_bytes(image_bytes)
+            cache.cache_dimensions(url, width, height)
+
+        num_tokens = calculate_image_tokens(
+            model_name=model_name,
+            width=width,
+            height=height,
+            max_tokens=model_config["max_tokens"],
+            model_config=model_config,
+        )
+        return num_tokens
+    except HTTPError as http_err:
+        print(f"HTTP error occurred while fetching image: {http_err}")
+    except RequestException as req_err:
+        print(f"Network error occurred: {req_err}")
+    except Exception as err:
+        print(f"An unexpected error occurred: {err}")
+
+    return -1
+
+

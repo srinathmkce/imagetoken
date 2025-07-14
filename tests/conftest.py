@@ -4,6 +4,10 @@ from pathlib import Path
 JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
 JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
 PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
+JPEG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpeg?raw=true"
+JPG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.jpg?raw=true"
+PNG_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
+CACHE_TEST_IMAGE_URL = "https://github.com/Shubham1193/imagetoken/blob/URL/Support/Images/kitten.png?raw=true"
 
 GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
 GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"
@@ -81,6 +85,16 @@ test_dimensions = [
     (512, 512),
     (1024, 1024),
 ]
+
+# Test data - 4 input types
+
+test_inputs = {
+    "file" : "tests/image_folder/kitten.jpg",
+    "folder" : "tests/image_folder",
+    "url" : JPEG_URL,
+    "urls" : [JPEG_URL , JPG_URL , PNG_URL],
+    "random" : "random text"
+}
 
 # Provide access to test functions
 # @pytest.fixture(scope="session")

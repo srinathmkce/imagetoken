@@ -125,3 +125,44 @@ def process_image_from_url(url: str, model_config: dict, cache : ImageDimensionC
     return -1
 
 
+def check_case(dataset: str , config: str = "default"):
+    
+    url = f'https://datasets-server.huggingface.co/rows?dataset={dataset}&config={config}&split=train&offset=0&length=1'
+    print(f"Requesting URL: {url}")
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        # Case 2: API error due to dataset size
+        if "error" in data:
+            print("Case 2 ❌ - Dataset too large or server error")
+            print(f"Error: {data['error']}")
+            return "Case 2", None
+
+        # Extract features from response
+        features = data.get("features", [])
+
+        # Case 1: Detect and return image-type features
+        image_features = [f for f in features if f.get("type", {}).get("_type") == "Image"]
+        if image_features:
+            print("Case 1 ✅ - Image defined in metadata")
+            print("Image-type features:")
+            # for feature in image_features:
+            #     print(feature)
+            return "Case 1", image_features
+
+        # Case 3: Detect external image URLs
+        has_url_like_feature = any("url" in f.get("name", "").lower() and f.get("type", {}).get("_type") == "Value" for f in features)
+        if has_url_like_feature:
+            print("Case 3 🌐 - Image accessible via URL field")
+            return "Case 3", None
+
+        # Unknown case
+        print("Unknown case ❓ - No image metadata or URL")
+        return "Unknown", None
+
+    except Exception as e:
+        print("Case 3 ⚠️ - Request failed or unexpected response")
+        print(f"Exception: {e}")
+        return "Case 3", None

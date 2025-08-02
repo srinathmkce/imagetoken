@@ -125,3 +125,59 @@ def process_image_from_url(url: str, model_config: dict, cache : ImageDimensionC
     return -1
 
 
+def check_case(dataset: str, config: str = "default"):
+    url = f'https://datasets-server.huggingface.co/rows?dataset={dataset}&config={config}&split=train&offset=0&length=1'
+    print(f"Requesting URL: {url}")
+
+    try:
+        response = requests.get(url)
+        data = response.json()
+
+        # Api error case - dataset has the image in pil format so cause of that size is large
+        if "error" in data:
+            print("Case 2 - Dataset too large or server error")
+            print(f"Error: {data['error']}")
+            return "Case 2"
+
+        # Api gives the json with height and widht
+        features = data.get("features", [])
+        image_features = [f for f in features if f.get("type", {}).get("_type") == "Image"]
+        if image_features:
+            print("Case 1 - Image defined in metadata")
+            return "Case 1"
+
+        # Checking if any value in the row contains an image URL
+        rows = data.get("rows", [])
+        if rows:
+            row = rows[0].get("row", {})
+            for key, value in row.items():
+                if isinstance(value, str) and value.startswith("http") and value.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.gif')):
+                    print(f"Case 3  - Found image URL in field: {key}")
+                    return "Case 3"
+                # Check for nested dict with URL field
+                if isinstance(value, dict):
+                    for v in value.values():
+                        if isinstance(v, str) and v.startswith("http") and v.lower().endswith(('.jpg', '.jpeg', '.png', '.webp', '.gif')):
+                            print(f"Case 3 - Found nested image URL in field: {key}")
+                            return "Case 3"
+
+        print("Unknown case - No image metadata or image URL found")
+        return "Unknown"
+
+    except Exception as e:
+        print("Case 3 - Request failed or unexpected response")
+        print(f"Exception: {e}")
+        return "Case 3"
+
+def is_image_url(url):
+    return isinstance(url, str) and url.startswith("http") and url.lower().endswith((".jpg", ".jpeg", ".png", ".webp", ".gif"))
+
+def get_image_url_field(row):
+    for key, value in row.items():
+        if is_image_url(value):
+            return key
+        if isinstance(value, dict):
+            for v in value.values():
+                if is_image_url(v):
+                    return key
+    return None

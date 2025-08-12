@@ -9,6 +9,10 @@ JPG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/
 PNG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 CACHE_TEST_IMAGE_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 
+GPT_5_MINI_MODEL_NAME = "gpt-5-mini"
+GPT_5_NANO_MODEL_NAME = "gpt-5-nano"
+GPT_5_MODEL_NAME = "gpt-5"
+GPT_5_CHAT_LATEST_MODEL_NAME = "gpt-5-chat-latest"
 GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
 GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"
 O_4_MINI_MODEL_NAME = "o4-mini"
@@ -27,6 +31,30 @@ MODEL_NAMES = [
 
 
 EXPECTED_OUTPUT_TOKENS = {
+    GPT_5_MINI_MODEL_NAME: {
+        JPG_URL: 648 - 6,           # 642
+        JPEG_URL: 1839 - 6,         # 1833
+        PNG_URL: 321 - 6,           # 315
+        "total_tokens": (642 + 1833 + 315),  # 2790
+    },
+    GPT_5_NANO_MODEL_NAME: {
+        JPG_URL: 807 - 6,           # 801
+        JPEG_URL: 2295 - 6,         # 2289
+        PNG_URL: 397 - 6,           # 391
+        "total_tokens": (801 + 2289 + 391),  # 3481
+    },
+    GPT_5_MODEL_NAME: {
+        JPG_URL: 639 - 6,           # 633
+        JPEG_URL: 639 - 6,          # 633
+        PNG_URL: 222 - 6,           # 216
+        "total_tokens": (633 + 633 + 216),   # 1482
+    },
+    GPT_5_CHAT_LATEST_MODEL_NAME: {
+        JPG_URL: 643 - 6,           # 637
+        JPEG_URL: 643 - 6,          # 637
+        PNG_URL: 223 - 6,           # 217
+        "total_tokens": (637 + 637 + 217),   # 1491
+    },
     GPT_4_1_MINI_MODEL_NAME: {
         JPG_FILE_PATH: 865,
         JPEG_FILE_PATH: 2473,

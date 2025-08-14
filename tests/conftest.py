@@ -32,28 +32,28 @@ MODEL_NAMES = [
 
 EXPECTED_OUTPUT_TOKENS = {
     GPT_5_MINI_MODEL_NAME: {
-        JPG_URL: 648 - 6,           # 642
-        JPEG_URL: 1839 - 6,         # 1833
-        PNG_URL: 321 - 6,           # 315
-        "total_tokens": (642 + 1833 + 315),  # 2790
+        JPG_URL: 643,
+        JPEG_URL: 1843,
+        PNG_URL: 316,
+        "total_tokens": 2802,
     },
     GPT_5_NANO_MODEL_NAME: {
-        JPG_URL: 807 - 6,           # 801
-        JPEG_URL: 2295 - 6,         # 2289
-        PNG_URL: 397 - 6,           # 391
-        "total_tokens": (801 + 2289 + 391),  # 3481
+        JPG_URL: 802,
+        JPEG_URL: 2290,
+        PNG_URL: 393,
+        "total_tokens": 3485,
     },
     GPT_5_MODEL_NAME: {
-        JPG_URL: 639 - 6,           # 633
-        JPEG_URL: 639 - 6,          # 633
-        PNG_URL: 222 - 6,           # 216
-        "total_tokens": (633 + 633 + 216),   # 1482
+        JPG_URL: 634,
+        JPEG_URL: 634,
+        PNG_URL: 217,
+        "total_tokens": 1485,
     },
     GPT_5_CHAT_LATEST_MODEL_NAME: {
-        JPG_URL: 643 - 6,           # 637
-        JPEG_URL: 643 - 6,          # 637
-        PNG_URL: 223 - 6,           # 217
-        "total_tokens": (637 + 637 + 217),   # 1491
+        JPG_URL: 638,
+        JPEG_URL: 638,
+        PNG_URL: 218,
+        "total_tokens": 1494,
     },
     GPT_4_1_MINI_MODEL_NAME: {
         JPG_FILE_PATH: 865,

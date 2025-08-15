@@ -1,12 +1,12 @@
 openai_config = {
     "gpt-5-mini": {
-        "factor": 1.62,
+        "factor": 1.2,
         "max_tokens": 1536,
         "input_tokens": 0.25,
         "output_tokens": 2.00,
     },
     "gpt-5-nano": {
-        "factor": 2.46,
+        "factor": 1.5,
         "max_tokens": 1536,
         "input_tokens": 0.05,
         "output_tokens": 0.40,

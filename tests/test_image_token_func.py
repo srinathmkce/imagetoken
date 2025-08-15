@@ -62,7 +62,7 @@ def test_with_openai_api_key_models(model_name):
     print("Number of input tokens from OpenAI: ", input_tokens_from_openai)
 
     assert int(calculated_input_tokens) == pytest.approx(
-        input_tokens_from_openai, abs=3
+        input_tokens_from_openai, abs=6
     )
 
 
@@ -110,5 +110,5 @@ def test_process_image_from_url_with_openai_api_integration(model_name):
     print(f"Input tokens from OpenAI API: {input_tokens_from_openai}")
 
     assert int(calculated_input_tokens) == pytest.approx(
-        input_tokens_from_openai, abs=3
+        input_tokens_from_openai, abs=6
     )

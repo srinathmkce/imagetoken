@@ -10,6 +10,9 @@ pip install image-token
 
 ## Supported models
 
+- gpt-5
+- gpt-5-mini
+- gpt-5-nano
 - gpt-4.1-mini
 - gpt-4.1-nano
 - gpt-4.1
@@ -17,24 +20,28 @@ pip install image-token
 - gpt-4o
 - gpt-4o-mini
 
+> **Note**  
+> The token count provided by `image-token` is an **estimation**.  
+> Actual tokenization may vary by **±1–5 tokens**, depending on the model implementation.
+
 ## Usage
 
 To get the number of tokens for a single image
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"kitten.jpg")
+num_tokens = get_token(model_name="gpt-5-mini", path=r"kitten.jpg")
 ```
 
 To get the number of tokens for a directory of images
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"image_folder")
+num_tokens = get_token(model_name="gpt-5-mini", path=r"image_folder")
 ```
 
 To get the number of tokens for a URL
 ```python
 from image_token import get_token
-num_tokens = get_token(model_name="gpt-4.1-mini", path=r"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg")
+num_tokens = get_token(model_name="gpt-5-mini", path=r"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg")
 ```
 
 To get the number of token for multiple URLS
@@ -44,13 +51,13 @@ urls = ["https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/ki
 ,"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
 ,"https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 ]
-num_tokens = get_token(model_name="gpt-4.1-mini",path=urls)
+num_tokens = get_token(model_name="gpt-5-mini",path=urls)
 ```
 
 To get the estimated cost of generating text from an image or directory of images
 ```python
 from image_token import get_cost
-cost = get_cost(model_name="gpt-4.1-nano", system_prompt_tokens=300 * 100, approx_output_tokens=100 * 100, path=r"image_folder")
+cost = get_cost(model_name="gpt-5-nano", system_prompt_tokens=300 * 100, approx_output_tokens=100 * 100, path=r"image_folder")
 ```
 
 ## Langchain integration
@@ -64,7 +71,7 @@ from langchain_core.messages import HumanMessage, SystemMessage
 from image_token import simulate_image_token_cost
 
 
-llm = ChatOpenAI(model="gpt-4.1-nano")
+llm = ChatOpenAI(model="gpt-5-nano")
 
 path = str(Path("tests") / "image_folder" / "kitten.jpg")
 
@@ -98,7 +105,7 @@ from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
 from image_token import simulate_image_token_cost
 
-llm = ChatOpenAI(model="gpt-4.1-nano")
+llm = ChatOpenAI(model="gpt-5-nano")
 
 image_data_url = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
 

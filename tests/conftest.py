@@ -9,6 +9,10 @@ JPG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/
 PNG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 CACHE_TEST_IMAGE_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
 
+GPT_5_MINI_MODEL_NAME = "gpt-5-mini"
+GPT_5_NANO_MODEL_NAME = "gpt-5-nano"
+GPT_5_MODEL_NAME = "gpt-5"
+GPT_5_CHAT_LATEST_MODEL_NAME = "gpt-5-chat-latest"
 GPT_4_1_MINI_MODEL_NAME = "gpt-4.1-mini"
 GPT_4_1_NANO_MODEL_NAME = "gpt-4.1-nano"
 O_4_MINI_MODEL_NAME = "o4-mini"
@@ -22,11 +26,37 @@ GPT_4_1_MODEL_NAME = "gpt-4.1"
 # ]
 
 MODEL_NAMES = [
-    GPT_4_O_MINI_MODEL_NAME,
+    GPT_5_NANO_MODEL_NAME,
+    GPT_4_O_MODEL_NAME
+
 ]
 
 
 EXPECTED_OUTPUT_TOKENS = {
+    GPT_5_MINI_MODEL_NAME: {
+        JPG_FILE_PATH: 643,
+        JPEG_FILE_PATH: 1834,
+        PNG_FILE_PATH: 316,
+        "total_tokens": 2793,
+    },
+    GPT_5_NANO_MODEL_NAME: {
+        JPG_FILE_PATH: 802,
+        JPEG_FILE_PATH: 2290,
+        PNG_FILE_PATH: 393,
+        "total_tokens": 3485,
+    },
+    GPT_5_MODEL_NAME: {
+        JPG_FILE_PATH: 639,
+        JPEG_FILE_PATH: 639,
+        PNG_FILE_PATH: 219,
+        "total_tokens": 1497,
+    },
+    GPT_5_CHAT_LATEST_MODEL_NAME: {
+        JPG_FILE_PATH: 639,
+        JPEG_FILE_PATH: 639,
+        PNG_FILE_PATH: 219,
+        "total_tokens": 1497,
+    },
     GPT_4_1_MINI_MODEL_NAME: {
         JPG_FILE_PATH: 865,
         JPEG_FILE_PATH: 2473,
@@ -48,22 +78,23 @@ EXPECTED_OUTPUT_TOKENS = {
     GPT_4_O_MINI_MODEL_NAME: {
         JPG_FILE_PATH: 25510,
         JPEG_FILE_PATH: 25510,
-        PNG_FILE_PATH: 25510,
-        "total_tokens": 76530,
+        PNG_FILE_PATH: 8509,
+        "total_tokens": 59529,
     },
     GPT_4_O_MODEL_NAME: {
         JPG_FILE_PATH: 774,
         JPEG_FILE_PATH: 774,
-        PNG_FILE_PATH: 774,
-        "total_tokens": 2322,
+        PNG_FILE_PATH: 264,
+        "total_tokens": 1812,
     },
     GPT_4_1_MODEL_NAME: {
         JPG_FILE_PATH: 774,
         JPEG_FILE_PATH: 774,
-        PNG_FILE_PATH: 774,
-        "total_tokens": 2322,
+        PNG_FILE_PATH: 264,
+        "total_tokens": 1812,
     },
 }
+
 
 test_cases = {
     (64, 64): 15,

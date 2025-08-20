@@ -122,15 +122,21 @@ def calculate_image_tokens_tile(width, height, tile_models, model_name, tile_siz
 
     # Step 1: Scale to fit in 2048x2048
     max_side = 2048
-    scale_factor_1 = min(max_side / width, max_side / height)
-    width_resized = width * scale_factor_1
-    height_resized = height * scale_factor_1
+    width_resized = width
+    height_resized = height
+    if width > max_side or height > max_side:
+        scale_factor = max_side / max(width, height)
+        width_resized = width * scale_factor
+        height_resized = height * scale_factor
 
     # Step 2: Resize shortest side to 768
+    final_width = width_resized
+    final_height = height_resized
     shortest = min(width_resized, height_resized)
-    scale_factor_2 = 768 / shortest
-    final_width = width_resized * scale_factor_2
-    final_height = height_resized * scale_factor_2
+    if shortest > 768:   
+        scale_factor_2 = 768 / shortest
+        final_width = width_resized * scale_factor_2
+        final_height = height_resized * scale_factor_2
 
     # Step 3: Count tiles (each 512x512)
     tiles_w = math.ceil(final_width / tile_size)

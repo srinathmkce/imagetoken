@@ -78,3 +78,98 @@ tile_models = {
     "gpt-4o": {"base": 85, "tile": 170},
     "gpt-4o-mini": {"base": 2833, "tile": 5667},
 }
+
+gemini_config = {
+    "gemini-2.5-pro": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": 200000,
+                "input_cost_per_million_tokens": 1.25,
+                "output_cost_per_million_tokens": 10.00,
+            },
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 2.50,
+                "output_cost_per_million_tokens": 15.00,
+            },
+        ]
+    },
+    "gemini-2.5-flash": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": {
+                    "text": 0.30,
+                    "image": 0.30,
+                    "video": 0.30,
+                    "audio": 1.00,
+                },
+                "output_cost_per_million_tokens": 2.50,
+            }
+        ]
+    },
+    "gemini-2.5-flash-image": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float('inf'),
+                "output_cost_per_million_tokens": 30.00,
+            }
+        ]
+    },
+    "gemini-2.0-flash": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 0.10,
+                "output_cost_per_million_tokens": 0.40,
+            }
+        ]
+    },
+    "gemini-2.0-flash-lite": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 0.075,
+                "output_cost_per_million_tokens": 0.030,
+            }
+        ]
+    },
+    "gemini-1.5-pro": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": 128000,
+                "input_cost_per_million_tokens": 1.25,
+                "output_cost_per_million_tokens": 5.00,
+            },
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 2.50,
+                "output_cost_per_million_tokens": 10.00,
+            },
+        ]
+    },
+    "gemini-1.5-flash": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": 128000,
+                "input_cost_per_million_tokens": 0.075,
+                "output_cost_per_million_tokens": 0.30,
+            },
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 0.15,
+                "output_cost_per_million_tokens": 0.60,
+            },
+        ]
+    },
+    "gemini-1.0-pro": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float('inf'),
+                "input_cost_per_million_tokens": 0.50,
+                "output_cost_per_million_tokens": 1.50,
+            }
+        ]
+    },
+}
+

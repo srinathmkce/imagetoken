@@ -4,10 +4,18 @@ from pathlib import Path
 JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
 JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
 PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
-JPEG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
-JPG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
-PNG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
-CACHE_TEST_IMAGE_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+JPEG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
+)
+JPG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
+)
+PNG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+)
+CACHE_TEST_IMAGE_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+)
 
 GPT_5_MINI_MODEL_NAME = "gpt-5-mini"
 GPT_5_NANO_MODEL_NAME = "gpt-5-nano"
@@ -25,11 +33,7 @@ GPT_4_1_MODEL_NAME = "gpt-4.1"
 #     GPT_4_O_MINI_MODEL_NAME, GPT_4_O_MODEL_NAME, GPT_4_1_MODEL_NAME,
 # ]
 
-MODEL_NAMES = [
-    GPT_5_NANO_MODEL_NAME,
-    GPT_4_O_MODEL_NAME
-
-]
+MODEL_NAMES = [GPT_5_NANO_MODEL_NAME, GPT_4_O_MODEL_NAME]
 
 
 EXPECTED_OUTPUT_TOKENS = {
@@ -120,11 +124,11 @@ test_dimensions = [
 # Test data - 4 input types
 
 test_inputs = {
-    "file" : "tests/image_folder/kitten.jpg",
-    "folder" : "tests/image_folder",
-    "url" : JPEG_URL,
-    "urls" : [JPEG_URL , JPG_URL , PNG_URL],
-    "random" : "random text"
+    "file": "tests/image_folder/kitten.jpg",
+    "folder": "tests/image_folder",
+    "url": JPEG_URL,
+    "urls": [JPEG_URL, JPG_URL, PNG_URL],
+    "random": "random text",
 }
 
 # Provide access to test functions

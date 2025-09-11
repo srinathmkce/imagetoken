@@ -2,10 +2,15 @@ import os
 from PIL import Image
 from io import BytesIO
 import requests
-from requests.exceptions import HTTPError , RequestException
+from requests.exceptions import HTTPError, RequestException
 from image_token.caching_utils import ImageDimensionCache
-from image_token.core import calculate_image_tokens_openai , calculate_image_tokens_gemini
+import tiktoken
 
+def calculate_text_tokens(model_name: str, text: str):
+    enc = tiktoken.encoding_for_model("gpt-4o")
+    tokens = enc.encode(text)
+    num_tokens = len(tokens)
+    return num_tokens
 
 def read_image_dims(path: str) -> tuple[int, int]:
     """
@@ -50,66 +55,6 @@ def list_all_images(path: str, sub_dir: bool = True):
                 yield os.path.join(path, file)
 
 
-def calculate_openai_cost(input_tokens: int, output_tokens: int, config: dict) -> float:
-    """
-    Calculates the cost of generating text from an image or directory of images.
-
-    The cost is calculated as the sum of the input and output costs, which are
-    calculated as the number of tokens divided by 10^6 and multiplied by the
-    respective cost per token.
-
-    Args:
-        input_tokens (int): The number of input tokens.
-        output_tokens (int): The number of output tokens.
-        config (dict): A dictionary containing the cost per input token and
-                       output token.
-
-    Returns:
-        float: The cost of generating text from the image or directory of images.
-    """
-    input_cost = (input_tokens / 10**6) * config["input_tokens"]
-    output_cost = (output_tokens / 10**6) * config["output_tokens"]
-    return input_cost + output_cost
-
-def calculate_gemini_cost(
-    input_tokens: int,
-    output_tokens: int,
-    config: dict,
-    input_modality: str = "text"
-) -> float:
-    """
-    Calculate the estimated cost of a request to a Gemini model with dynamic pricing.
-
-    Args:
-        input_tokens (int): The number of tokens in the input.
-        output_tokens (int): The number of tokens in the output.
-        config (dict): The configuration dictionary for the model.
-        input_modality (str): The modality of the input ('text', 'image', 'video', 'audio').
-                               Defaults to 'text'.
-
-    Returns:
-        float: The estimated cost in dollars.
-    """
-    tier = None
-    for t in config.get("pricing_tiers", []):
-        if input_tokens <= t["up_to_tokens"]:
-            tier = t
-            break
-
-    if not tier:
-        raise ValueError("No suitable pricing tier found for the given number of input tokens.")
-
-    input_cost_rate = tier.get("input_cost_per_million_tokens", 0)
-    if isinstance(input_cost_rate, dict):
-        input_cost_rate = input_cost_rate.get(input_modality, 0)
-
-    output_cost_rate = tier.get("output_cost_per_million_tokens", 0)
-
-    input_cost = (input_tokens / 1_000_000) * input_cost_rate
-    output_cost = (output_tokens / 1_000_000) * output_cost_rate
-
-    return input_cost + output_cost
-
 def get_image_dimensions_from_bytes(image_bytes: bytes) -> tuple[int, int]:
     """
     Reads the image bytes from request
@@ -121,77 +66,9 @@ def get_image_dimensions_from_bytes(image_bytes: bytes) -> tuple[int, int]:
         tuple: [height , width].
     """
     try:
+        print("bytes called")
         with Image.open(BytesIO(image_bytes)) as img:
             return img.size
     except Exception as e:
         return None
 
-
-def process_image_from_url_openai(url: str, model_config: dict, cache : ImageDimensionCache , model_name: str = None ) -> int:
-    """
-    Process an image from a URL and calculate number of tokens, using persistent dimension cache.
-
-    """
-    try :
-        dimensions = cache.get_cached_dimensions(url)
-
-        if dimensions:
-            width, height = dimensions
-        else:
-            response = requests.get(url)
-            response.raise_for_status()
-
-            image_bytes = response.content
-            width, height = get_image_dimensions_from_bytes(image_bytes)
-            cache.cache_dimensions(url, width, height)
-
-        num_tokens = calculate_image_tokens_openai(
-            model_name=model_name,
-            width=width,
-            height=height,
-            max_tokens=model_config["max_tokens"],
-            model_config=model_config,
-        )
-        return num_tokens
-    except HTTPError as http_err:
-        print(f"HTTP error occurred while fetching image: {http_err}")
-    except RequestException as req_err:
-        print(f"Network error occurred: {req_err}")
-    except Exception as err:
-        print(f"An unexpected error occurred: {err}")
-
-    return -1
-
-
-def process_image_from_url_gemini(url: str, model_name: str = None , cache : ImageDimensionCache = None) -> int:
-    """
-    Process an image from a URL and calculate number of tokens, using persistent dimension cache.
-
-    """
-    try :
-        dimensions = cache.get_cached_dimensions(url)
-
-        if dimensions:
-            width, height = dimensions
-        else:
-            response = requests.get(url)
-            response.raise_for_status()
-
-            image_bytes = response.content
-            width, height = get_image_dimensions_from_bytes(image_bytes)
-            cache.cache_dimensions(url, width, height)
-
-        num_tokens = calculate_image_tokens_gemini(
-            model_name=model_name,
-            width=width,
-            height=height
-        )
-        return num_tokens
-    except HTTPError as http_err:
-        print(f"HTTP error occurred while fetching image: {http_err}")
-    except RequestException as req_err:
-        print(f"Network error occurred: {req_err}")
-    except Exception as err:
-        print(f"An unexpected error occurred: {err}")
-
-    return -1

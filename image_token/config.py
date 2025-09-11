@@ -72,8 +72,8 @@ patch_models = {
 
 
 tile_models = {
-    "gpt-5": {"base": 70 , "tile": 140},
-    "gpt-5-chat-latest": {"base": 70 , "tile": 140},
+    "gpt-5": {"base": 70, "tile": 140},
+    "gpt-5-chat-latest": {"base": 70, "tile": 140},
     "gpt-4.1": {"base": 85, "tile": 170},
     "gpt-4o": {"base": 85, "tile": 170},
     "gpt-4o-mini": {"base": 2833, "tile": 5667},
@@ -88,7 +88,7 @@ gemini_config = {
                 "output_cost_per_million_tokens": 10.00,
             },
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 2.50,
                 "output_cost_per_million_tokens": 15.00,
             },
@@ -97,7 +97,7 @@ gemini_config = {
     "gemini-2.5-flash": {
         "pricing_tiers": [
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": {
                     "text": 0.30,
                     "image": 0.30,
@@ -111,7 +111,7 @@ gemini_config = {
     "gemini-2.5-flash-image": {
         "pricing_tiers": [
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "output_cost_per_million_tokens": 30.00,
             }
         ]
@@ -119,7 +119,7 @@ gemini_config = {
     "gemini-2.0-flash": {
         "pricing_tiers": [
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 0.10,
                 "output_cost_per_million_tokens": 0.40,
             }
@@ -128,7 +128,7 @@ gemini_config = {
     "gemini-2.0-flash-lite": {
         "pricing_tiers": [
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 0.075,
                 "output_cost_per_million_tokens": 0.030,
             }
@@ -142,7 +142,7 @@ gemini_config = {
                 "output_cost_per_million_tokens": 5.00,
             },
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 2.50,
                 "output_cost_per_million_tokens": 10.00,
             },
@@ -156,7 +156,7 @@ gemini_config = {
                 "output_cost_per_million_tokens": 0.30,
             },
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 0.15,
                 "output_cost_per_million_tokens": 0.60,
             },
@@ -165,11 +165,10 @@ gemini_config = {
     "gemini-1.0-pro": {
         "pricing_tiers": [
             {
-                "up_to_tokens": float('inf'),
+                "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 0.50,
                 "output_cost_per_million_tokens": 1.50,
             }
         ]
     },
 }
-

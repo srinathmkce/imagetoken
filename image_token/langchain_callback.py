@@ -5,10 +5,9 @@ from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
-from image_token.core import calculate_image_tokens_openai, calculate_text_tokens
-from image_token.main import process_image_from_url_openai
+from image_token.utils import calculate_text_tokens
+from image_token.OpenAi import OpenAiModel
 from image_token.config import openai_config
-from image_token.utils import calculate_openai_cost
 from urllib.parse import urlparse
 from image_token.caching_utils import ImageDimensionCache
 
@@ -19,11 +18,15 @@ load_dotenv()
 
 
 class LoggingHandler(BaseCallbackHandler):
+
+    model = None
     def __init__(self):
         super().__init__()
         self.total_tokens = 0
         self.total_cost = 0.0
         self.prefix_tokens = 13
+        self.model = OpenAiModel()
+        
 
     def _get_model_name(self, kwargs):
         return kwargs.get("invocation_params", {}).get("model_name")
@@ -44,13 +47,15 @@ class LoggingHandler(BaseCallbackHandler):
         if not model_config:
             return None
         with ImageDimensionCache() as cache:
-            return process_image_from_url_openai(url, model_config=model_config, model_name=model_name,cache=cache)
+            return self.model.process_image_from_url(
+                url, model_config=model_config, model_name=model_name, cache=cache
+            )
 
     def _calculate_image_tokens(self, model_name, width, height):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-        return calculate_image_tokens_openai(
+        return self.model.calculate_image_tokens(
             model_name, width, height, model_config["max_tokens"], model_config
         )
 
@@ -58,7 +63,7 @@ class LoggingHandler(BaseCallbackHandler):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-        return calculate_openai_cost(
+        return self.model.calculate_cost(
             input_tokens=input_tokens, output_tokens=0, config=model_config
         )
 
@@ -108,7 +113,7 @@ class LoggingHandler(BaseCallbackHandler):
                                 self.total_tokens += tokens
 
         self.total_tokens += self.prefix_tokens
-        self.total_cost = calculate_openai_cost(
+        self.total_cost = self.model.calculate_cost(
             input_tokens=self.total_tokens,
             output_tokens=0,
             config=openai_config[model_name],

@@ -1,179 +1,17 @@
-from image_token.main import VisionModel
-import json
-from image_token.validate import (
-    check_if_path_is_file,
-    check_if_path_is_folder,
-    check_allowed_extensions,
-    check_valid_model,
-    is_url,
-    is_multiple_urls,
-)
-from image_token.utils import (
-    read_image_dims,
-    list_all_images,
-    get_image_dimensions_from_bytes
-)
-
+from image_token.baseclass import VisionModel
 from image_token.config import openai_config
-from tqdm import tqdm
-from pathlib import Path
-from image_token.caching_utils import ImageDimensionCache
-import requests
-from requests.exceptions import HTTPError, RequestException
 import math
 from image_token.config import patch_models, tile_models
 
 
 class OpenAiModel(VisionModel):
 
-    def process_image(self, path: str, model_config: dict, model_name: str = None):
-        """
-        Process an image and calculate the number of tokens in it.
-
-        Args:
-            path (str): The path to the image file.
-            model_config (dict): The configuration for the model.
-
-        Returns:
-            int: The number of tokens in the image.
-        """
-        check_allowed_extensions(path=path)
-
-        width, height = read_image_dims(path=path)
-
-        max_tokens = model_config["max_tokens"]
-
-        num_tokens = self.calculate_image_tokens(
-            model_name=model_name,
-            width=width,
-            height=height,
-            max_tokens=max_tokens,
-            model_config=model_config,
-        )
-
-        return num_tokens
-
-    def process_image_from_url(
-        self,
-        url: str,
-        model_config: dict,
-        cache: ImageDimensionCache,
-        model_name: str = None,
-    ) -> int:
-        """
-        Process an image from a URL and calculate number of tokens, using persistent dimension cache.
-
-        """
-        try:
-            dimensions = cache.get_cached_dimensions(url)
-
-            if dimensions:
-                width, height = dimensions
-            else:
-                response = requests.get(url)
-                response.raise_for_status()
-
-                image_bytes = response.content
-                width, height = get_image_dimensions_from_bytes(image_bytes)
-                cache.cache_dimensions(url, width, height)
-
-            num_tokens = self.calculate_image_tokens(
-                model_name=model_name,
-                width=width,
-                height=height,
-                max_tokens=model_config["max_tokens"],
-                model_config=model_config,
-            )
-            return num_tokens
-        except HTTPError as http_err:
-            print(f"HTTP error occurred while fetching image: {http_err}")
-        except RequestException as req_err:
-            print(f"Network error occurred: {req_err}")
-        except Exception as err:
-            print(f"An unexpected error occurred: {err}")
-
-        return -1
-
-    def get_token(
-        self, model_name: str, path: str, prefix_tokens: int = 9, save_to: str = None
-    ):
-        """
-        Calculate and return the total number of tokens for a given image or directory of images.
-
-        This function processes an image or a directory of images, calculates the number of tokens
-        for each image based on the given model configuration, and optionally saves the results to
-        a file. The total number of tokens includes the prefix tokens.
-
-        Args:
-            model_name (str): The name of the model to use for token calculation.
-            path (str): The path to the image file or directory containing images.
-            prefix_tokens (int, optional): The number of tokens to add as a prefix. Defaults to 9.
-            save_to (str, optional): The path to a file where the results should be saved. If None,
-                                    the results are not saved to a file.
-
-        Returns:
-            int: The total number of tokens calculated.
-        """
-        print("openai model called")
-        check_valid_model(model_name=model_name)
-        model_config = openai_config[model_name]
-        result_dict = {}
-        total_tokens = 0
-
-        if check_if_path_is_file(path=path):
-            num_tokens = self.process_image(
-                path=path, model_config=model_config, model_name=model_name
-            )
-            total_tokens = num_tokens + prefix_tokens
-            result_dict[path] = total_tokens
-        elif check_if_path_is_folder(path=path):
-            image_files = list_all_images(path=path)
-            total_tokens = 0
-            for image_path in tqdm(image_files):
-                num_tokens = self.process_image(
-                    path=image_path, model_config=model_config, model_name=model_name
-                )
-                total_tokens += num_tokens + prefix_tokens
-                result_dict[image_path] = num_tokens + prefix_tokens
-        elif is_url(path=path):
-            with ImageDimensionCache() as cache:
-                num_tokens = self.process_image_from_url(
-                    url=path,
-                    model_config=model_config,
-                    model_name=model_name,
-                    cache=cache,
-                )
-            total_tokens = num_tokens + prefix_tokens
-            result_dict[path] = total_tokens
-        elif is_multiple_urls(urls=path):
-            with ImageDimensionCache() as cache:
-                for url in path:
-                    num_tokens = self.process_image_from_url(
-                        url=url,
-                        model_name=model_name,
-                        model_config=model_config,
-                        cache=cache,
-                    )
-                    total_tokens += num_tokens + prefix_tokens
-                    result_dict[url] = num_tokens + prefix_tokens
-        else:
-            raise ValueError(
-                f"Invalid input path or URL: '{path}'. The given input is not a valid file, folder, or URL."
-            )
-
-        if save_to:
-            with open(save_to, "w") as f:
-                json.dump(result_dict, f, indent=4)
-
-        return total_tokens
-
     def calculate_image_tokens(
         self,
         model_name: str,
         width: int,
         height: int,
-        max_tokens: int,
-        model_config: dict,
+        **kwargs
     ):
         """
         Calculate the number of tokens for an image based on the model configuration.
@@ -188,11 +26,15 @@ class OpenAiModel(VisionModel):
         Returns:
             int: The number of tokens for the image.
         """
+        prefix_tokens = kwargs.get("prefix_tokens", 9)
+
         if model_name in patch_models:
+            model_config = openai_config[model_name]
+            max_tokens = model_config[max_tokens]
             num_tokens = self.calculate_image_tokens_patch(
                 width=width, height=height, max_tokens=max_tokens
             )
-            return int(num_tokens * model_config["factor"])
+            return int(num_tokens * model_config["factor"]) + prefix_tokens
 
         elif model_name in tile_models:
             num_tokens = self.calculate_image_tokens_tile(
@@ -201,7 +43,7 @@ class OpenAiModel(VisionModel):
                 tile_models=tile_models,
                 model_name=model_name,
             )
-            return num_tokens
+            return num_tokens + prefix_tokens
         else:
             raise ValueError(
                 f"Model {model_name} is not supported for image token calculation."
@@ -315,7 +157,7 @@ class OpenAiModel(VisionModel):
         return base + tile_count * per_tile
 
     def calculate_cost(
-        self, input_tokens: int, output_tokens: int, config: dict
+        self, model_name: str, input_tokens: int, output_tokens: int
     ) -> float:
         """
         Calculates the cost of generating text from an image or directory of images.
@@ -333,45 +175,7 @@ class OpenAiModel(VisionModel):
         Returns:
             float: The cost of generating text from the image or directory of images.
         """
-        input_cost = (input_tokens / 10**6) * config["input_tokens"]
-        output_cost = (output_tokens / 10**6) * config["output_tokens"]
-        return input_cost + output_cost
-
-    def get_cost(
-        self,
-        model_name: str,
-        system_prompt_tokens: int,
-        approx_output_tokens: int,
-        path: Path | str,
-        save_to: str = None,
-        prefix_tokens: int = 9,
-    ):
-        """
-        Calculate and return the estimated cost of generating text from an image or directory of images.
-
-        Args:
-            model_name (str): The name of the model to use.
-            system_prompt_tokens (int): The number of tokens in the system prompt.
-            approx_output_tokens (int): The approximate number of tokens in the output.
-            path (str): The path to the image file or directory of images.
-            save_to (str): The path to save the output to.
-            prefix_tokens (int): The number of prefix tokens to use. Defaults to 9.
-
-        Returns:
-            float: The estimated cost in dollars.
-        """
-
         model_config = openai_config[model_name]
-        input_tokens = self.get_token(
-            model_name=model_name,
-            path=path,
-            prefix_tokens=prefix_tokens,
-            save_to=save_to,
-        )
-        cost = self.calculate_cost(
-            input_tokens=system_prompt_tokens + input_tokens,
-            output_tokens=approx_output_tokens,
-            config=model_config,
-        )
-
-        return cost
+        input_cost = (input_tokens / 10**6) * model_config["input_tokens"]
+        output_cost = (output_tokens / 10**6) * model_config["output_tokens"]
+        return input_cost + output_cost

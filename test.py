@@ -17,13 +17,30 @@ from image_token import get_token, get_cost
 #     "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg",
 #     "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png",
 # ]
-num_tokens = get_token(model_name="gemini-2.5-pro",path="https://media.licdn.com/dms/image/v2/D4D12AQEj4ADRPfqFyw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1701459621193?e=1760572800&v=beta&t=mQohKIKB5s87hjhfeQb4OB3T4I1DdXeucfaxGNMwHrk")
+# num_tokens = get_token(model_name="gemini-2.0-flash-lite",path=r"C:\Users\sish5001\OneDrive - NIQ\Documents\GitHub\imagetoken\Images\kitten.jpeg")
+
+# print("num token non langchain: " , num_tokens )
+
+
+# num_tokens = get_cost(model_name="gemini-2.0-flash-lite",path=r"C:\Users\sish5001\OneDrive - NIQ\Documents\GitHub\imagetoken\Images\kitten.jpeg" , system_prompt_tokens=1 , approx_output_tokens=1)
+# print(num_tokens)
+
+
+num_tokens = get_token(model_name="gpt-5",path=r"C:\Users\sish5001\OneDrive - NIQ\Documents\GitHub\imagetoken\Images\kitten.jpeg" , prefix_tokens = 10)
 
 print("num token non langchain: " , num_tokens )
 
 
-cost = get_cost(model_name="gemini-2.5-pro",path="https://media.licdn.com/dms/image/v2/D4D12AQEj4ADRPfqFyw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1701459621193?e=1760572800&v=beta&t=mQohKIKB5s87hjhfeQb4OB3T4I1DdXeucfaxGNMwHrk" , system_prompt_tokens=100 , approx_output_tokens=199)
-print("cost  " , cost)
+num_tokens = get_cost(model_name="gpt-5",path=r"C:\Users\sish5001\OneDrive - NIQ\Documents\GitHub\imagetoken\Images\kitten.jpeg" , system_prompt_tokens=1 , approx_output_tokens=1)
+print(num_tokens)
+
+
+# num_tokens = get_token(model_name="gpt-5",path=r"C:\Users\sish5001\OneDrive - NIQ\Documents\GitHub\imagetoken\Images\kitten.jpeg")
+# print(num_tokens)
+
+
+# cost = get_cost(model_name="gemini-2.5-pro",path="https://media.licdn.com/dms/image/v2/D4D12AQEj4ADRPfqFyw/article-cover_image-shrink_720_1280/article-cover_image-shrink_720_1280/0/1701459621193?e=1760572800&v=beta&t=mQohKIKB5s87hjhfeQb4OB3T4I1DdXeucfaxGNMwHrk" , system_prompt_tokens=100 , approx_output_tokens=199)
+# print("cost  " , cost)
 
 
 # import base64

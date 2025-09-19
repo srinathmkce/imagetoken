@@ -1,36 +1,33 @@
-from abc import ABC, abstractmethod
+from image_token.openai import OpenAiModel
+from image_token.gemini import GeminiModel
+from image_token.config import openai_config , gemini_config
 from pathlib import Path
 
+_current_model = None
 
-class VisionModel(ABC):
-    @abstractmethod
-    def get_token(self, *args, **kwargs):
-        """Retrieve a token based on name and path."""
-        pass
+def set_model(name: str):
+    global _current_model
+    _current_model = name.lower()
 
-    @abstractmethod
-    def process_image(self, path: str, name: str, config: dict):
-        """Process an image from a local path using the given configuration."""
-        pass
+def _get_model(model_name):
+    if model_name in openai_config:
+        return OpenAiModel()
+    elif model_name in gemini_config:
+        return GeminiModel()
+    else:
+        raise ValueError(f"Unsupported model: {_current_model}")
 
-    @abstractmethod
-    def process_image_from_url(self, url: str, name: str, config: dict):
-        """Process an image from a URL using the given configuration."""
-        pass
+def get_token(model_name: str, path: str|Path, save_to: str = None , **kwargs):
+    model = _get_model(model_name)
+    return model.get_token(model_name=model_name , path = path , save_to=save_to , **kwargs)
 
-    @abstractmethod
-    def calculate_image_tokens(self, name: str, h: int, w: int, config: dict):
-        """Calculate token count based on image dimensions and configuration."""
-        pass
-
-    @abstractmethod
-    def get_cost(
-        self, *args, **kwargs
-    ):
-        """Estimate the cost based on prompt and token usage."""
-        pass
-
-    @abstractmethod
-    def calculate_cost(self, input_token: int, ouput_tokens: int, config: dict):
-        "Estimate the cost of"
-        pass
+def get_cost(model_name: str,system_prompt_tokens: int,approx_output_tokens: int,path: Path | str,save_to: str = None, **kwargs):
+    model = _get_model(model_name)
+    return model.get_cost(
+        model_name,
+        system_prompt_tokens,
+        approx_output_tokens,
+        path,
+        save_to,
+        **kwargs
+    )

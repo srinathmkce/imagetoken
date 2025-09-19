@@ -6,7 +6,7 @@ import base64
 from PIL import Image
 from io import BytesIO
 from image_token.utils import calculate_text_tokens
-from image_token.OpenAi import OpenAiModel
+from image_token.openai import OpenAiModel
 from image_token.config import openai_config
 from urllib.parse import urlparse
 from image_token.caching_utils import ImageDimensionCache
@@ -46,17 +46,14 @@ class LoggingHandler(BaseCallbackHandler):
         model_config = self._get_model_config(model_name)
         if not model_config:
             return None
-        with ImageDimensionCache() as cache:
+        with ImageDimensionCache() as cache:  # need fix here cause moved the config to more internal method cause now process is generalex for all models
             return self.model.process_image_from_url(
-                url, model_config=model_config, model_name=model_name, cache=cache
+                url, model_name=model_name, cache=cache
             )
 
     def _calculate_image_tokens(self, model_name, width, height):
-        model_config = self._get_model_config(model_name)
-        if not model_config:
-            return None
         return self.model.calculate_image_tokens(
-            model_name, width, height, model_config["max_tokens"], model_config
+            model_name, width, height
         )
 
     def _calculate_approx_input_cost(self, model_name, input_tokens):
@@ -64,7 +61,7 @@ class LoggingHandler(BaseCallbackHandler):
         if not model_config:
             return None
         return self.model.calculate_cost(
-            input_tokens=input_tokens, output_tokens=0, config=model_config
+           model_name=model_name, input_tokens=input_tokens, output_tokens=0
         )
 
     def on_chat_model_start(self, serialized, messages, **kwargs):

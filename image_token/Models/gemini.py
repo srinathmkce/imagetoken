@@ -25,7 +25,6 @@ class GeminiModel(VisionModel):
                 - Otherwise, the image is divided into tiles, and 258 tokens are added per tile.
                 - The tile size is determined by the smaller side of the image, with a minimum of 256 and a maximum of 768.
         """
-        print("gemini called")
 
         num_tokens = 0
         model_version = model_name.split("-")[1]
@@ -43,7 +42,6 @@ class GeminiModel(VisionModel):
 
             total_tiles = tiles_w * tiles_h + 1
             num_tokens += total_tiles * 258
-        print("calculate called " , num_tokens)
 
         return num_tokens
 
@@ -57,12 +55,10 @@ class GeminiModel(VisionModel):
         Calculate the estimated cost of a request to a Gemini model with dynamic pricing.
 
         Args:
+            model_name (str): The name of the model.
             input_tokens (int): The number of tokens in the input.
             output_tokens (int): The number of tokens in the output.
-            config (dict): The configuration dictionary for the model.
-            input_modality (str): The modality of the input ('text', 'image', 'video', 'audio').
-                                Defaults to 'text'.
-
+    
         Returns:
             float: The estimated cost in dollars.
         """

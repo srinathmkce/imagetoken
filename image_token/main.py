@@ -1,5 +1,5 @@
-from image_token.openai import OpenAiModel
-from image_token.gemini import GeminiModel
+from image_token.Models.openai import OpenAiModel
+from image_token.Models.gemini import GeminiModel
 from image_token.config import openai_config , gemini_config
 from pathlib import Path
 

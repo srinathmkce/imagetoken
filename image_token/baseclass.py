@@ -41,7 +41,6 @@ class VisionModel(ABC):
             height=height,
             **kwargs
         )
-        print("pricess imaege" , num_tokens)
 
         return num_tokens
 
@@ -71,7 +70,6 @@ class VisionModel(ABC):
                 height=height,
                 **kwargs
             )
-            print("pricess imaege url called " , num_tokens)
             return num_tokens
         except HTTPError as http_err:
             print(f"HTTP error occurred while fetching image: {http_err}")
@@ -98,7 +96,7 @@ class VisionModel(ABC):
 
         elif check_if_path_is_folder(path=path):
             image_files = list_all_images(path=path)
-            for image_path in tqdm(image_files):
+            for image_path in tqdm.tqdm(image_files):
                 num_tokens = self.process_image(path=image_path, model_name=model_name, **kwargs)
                 total_tokens += num_tokens
                 result_dict[str(image_path)] = num_tokens

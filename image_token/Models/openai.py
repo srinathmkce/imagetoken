@@ -20,8 +20,6 @@ class OpenAiModel(VisionModel):
             model_name (str): The name of the model.
             width (int): The width of the image.
             height (int): The height of the image.
-            max_tokens (int): The maximum number of tokens for the model.
-            model_config (dict): The configuration for the model.
 
         Returns:
             int: The number of tokens for the image.
@@ -30,7 +28,7 @@ class OpenAiModel(VisionModel):
 
         if model_name in patch_models:
             model_config = openai_config[model_name]
-            max_tokens = model_config[max_tokens]
+            max_tokens = model_config["max_tokens"]
             num_tokens = self.calculate_image_tokens_patch(
                 width=width, height=height, max_tokens=max_tokens
             )

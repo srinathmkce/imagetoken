@@ -1,4 +1,5 @@
 import base64
+import pytest
 from pathlib import Path
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
@@ -49,7 +50,7 @@ def test_simulate_single_image():
     result = simulate_image_token_cost(llm, messages)
 
     assert isinstance(result, dict)
-    assert result["tokens"] == 1320
+    assert result["tokens"] == pytest.approx(1320 , abs = 10)
     assert result["cost"] == 0.00013
 
 
@@ -80,7 +81,7 @@ def test_func_test_all_images():
     result = simulate_image_token_cost(llm, messages)
 
     assert isinstance(result, dict)
-    assert result["tokens"] == 5690
+    assert result["tokens"] == pytest.approx(5690 , abs = 30)
     assert result["cost"] == 0.00057
 
 

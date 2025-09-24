@@ -117,7 +117,7 @@ gemini_config = {
             {
                 "up_to_tokens": float("inf"),
                 "input_cost_per_million_tokens": 0.30,
-                "output_cost_per_million_tokens": 30.00,   # need some fixing
+                "output_cost_per_million_tokens": 30.00,
             }
         ]
     },
@@ -139,45 +139,42 @@ gemini_config = {
             }
         ]
     },
+
+    "gemini-1.5-pro": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": 128000,
+                "input_cost_per_million_tokens": 1.25,
+                "output_cost_per_million_tokens": 5.00,
+            },
+            {
+                "up_to_tokens": float("inf"),
+                "input_cost_per_million_tokens": 2.50,
+                "output_cost_per_million_tokens": 10.00,
+            },
+        ]
+    },
+    "gemini-1.5-flash": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": 128000,
+                "input_cost_per_million_tokens": 0.075,
+                "output_cost_per_million_tokens": 0.30,
+            },
+            {
+                "up_to_tokens": float("inf"),
+                "input_cost_per_million_tokens": 0.15,
+                "output_cost_per_million_tokens": 0.60,
+            },
+        ]
+    },
+    "gemini-1.0-pro": {
+        "pricing_tiers": [
+            {
+                "up_to_tokens": float("inf"),
+                "input_cost_per_million_tokens": 0.50,
+                "output_cost_per_million_tokens": 1.50,
+            }
+        ]
+    },
 }
-
-
-# initally for gemini models keeping input form like text image video cause in future if want to expand to support them
-
-#   "gemini-1.5-pro": {
-        # "pricing_tiers": [
-            # {
-                # "up_to_tokens": 128000,
-                # "input_cost_per_million_tokens": 1.25,
-                # "output_cost_per_million_tokens": 5.00,
-            # },
-            # {
-                # "up_to_tokens": float("inf"),
-                # "input_cost_per_million_tokens": 2.50,
-                # "output_cost_per_million_tokens": 10.00,
-            # },
-        # ]
-    # },
-    # "gemini-1.5-flash": {
-        # "pricing_tiers": [
-            # {
-                # "up_to_tokens": 128000,
-                # "input_cost_per_million_tokens": 0.075,
-                # "output_cost_per_million_tokens": 0.30,
-            # },
-            # {
-                # "up_to_tokens": float("inf"),
-                # "input_cost_per_million_tokens": 0.15,
-                # "output_cost_per_million_tokens": 0.60,
-            # },
-        # ]
-    # },
-    # "gemini-1.0-pro": {
-        # "pricing_tiers": [
-            # {
-                # "up_to_tokens": float("inf"),
-                # "input_cost_per_million_tokens": 0.50,
-                # "output_cost_per_million_tokens": 1.50,
-            # }
-        # ]
-    # },

@@ -64,7 +64,6 @@ def test_with_openai_api_key_models(model_name):
         )
     ]
     response = llm.invoke(messages)
-    print(response)
     input_tokens_from_openai = response.usage_metadata["input_tokens"]
 
     print("Number of input tokens from OpenAI: ", input_tokens_from_openai)

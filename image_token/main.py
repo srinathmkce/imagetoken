@@ -1,6 +1,6 @@
-from image_token.Models.openai import OpenAiModel
-from image_token.Models.gemini import GeminiModel
-from image_token.config import openai_config , gemini_config
+from image_token.models.openai_helper import OpenAiModel
+from image_token.models.gemini_helper import GeminiModel
+from image_token.utils.config import openai_config , gemini_config
 from pathlib import Path
 
 _current_model = None

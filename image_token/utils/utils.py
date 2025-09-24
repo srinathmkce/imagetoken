@@ -3,7 +3,7 @@ from PIL import Image
 from io import BytesIO
 import requests
 from requests.exceptions import HTTPError, RequestException
-from image_token.caching_utils import ImageDimensionCache
+from image_token.utils.caching_utils import ImageDimensionCache
 import tiktoken
 
 def calculate_text_tokens(model_name: str, text: str):

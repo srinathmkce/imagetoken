@@ -4,19 +4,19 @@ import json
 import tqdm
 import requests
 from requests.exceptions import HTTPError, RequestException
-from image_token.validate import (
+from image_token.utils.validate import (
     check_if_path_is_file,
     check_if_path_is_folder,
     is_url,
     is_multiple_urls,
     check_allowed_extensions,
 )
-from image_token.utils import (
+from image_token.utils.utils import (
     list_all_images,
     read_image_dims,
     get_image_dimensions_from_bytes
 )
-from image_token.caching_utils import ImageDimensionCache
+from image_token.utils.caching_utils import ImageDimensionCache
 
 class VisionModel(ABC):
     

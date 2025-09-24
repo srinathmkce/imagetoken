@@ -23,10 +23,10 @@ from conftest import (
     test_cases,
     test_inputs,
 )
-from image_token.config import openai_config
-from image_token.caching_utils import ImageDimensionCache
+from image_token.utils.config import openai_config
+from image_token.utils.caching_utils import ImageDimensionCache
 import time
-from image_token.validate import (
+from image_token.utils.validate import (
     check_if_path_is_file,
     check_if_path_is_folder,
     is_url,

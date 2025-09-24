@@ -5,11 +5,11 @@ from pathlib import Path
 import base64
 from PIL import Image
 from io import BytesIO
-from image_token.utils import calculate_text_tokens
-from image_token.Models.openai import OpenAiModel
-from image_token.config import openai_config
+from image_token.utils.utils import calculate_text_tokens
+from image_token.models.openai_helper import OpenAiModel
+from image_token.utils.config import openai_config
 from urllib.parse import urlparse
-from image_token.caching_utils import ImageDimensionCache
+from image_token.utils.caching_utils import ImageDimensionCache
 
 
 from dotenv import load_dotenv

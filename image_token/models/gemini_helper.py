@@ -1,5 +1,5 @@
-from image_token.baseclass import VisionModel
-from image_token.config import gemini_config
+from image_token.base.base import VisionModel
+from image_token.utils.config import gemini_config
 import math
 
 

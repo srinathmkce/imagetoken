@@ -1,5 +1,5 @@
 import os
-from image_token.config import openai_config
+from image_token.utils.config import openai_config
 from urllib.parse import urlparse
 
 

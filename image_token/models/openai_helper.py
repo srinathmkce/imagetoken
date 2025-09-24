@@ -1,7 +1,7 @@
-from image_token.baseclass import VisionModel
-from image_token.config import openai_config
+from image_token.base.base import VisionModel
+from image_token.utils.config import openai_config
 import math
-from image_token.config import patch_models, tile_models
+from image_token.utils.config import patch_models, tile_models
 
 
 class OpenAiModel(VisionModel):

@@ -3,7 +3,7 @@ import pytest
 from pathlib import Path
 from langchain_core.messages import SystemMessage, HumanMessage
 from langchain_openai import ChatOpenAI
-from image_token.langchain_callback import simulate_image_token_cost
+from image_token.frameworks.langchain_callback import simulate_image_token_cost
 
 
 def encode_image_to_data_url(image_path: Path) -> str:

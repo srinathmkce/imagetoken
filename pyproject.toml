@@ -1,6 +1,6 @@
 [project]
 name = "image-token"
-version = "0.1.4"
+version = "0.1.6"
 description = "A package to calculate the number of tokens in an image or folder"
 readme = "README.md"
 license = { file="LICENSE" }
@@ -22,5 +22,5 @@ Homepage = "https://github.com/srinathmkce/imagetoken"
 requires = ["setuptools>=61.0"]
 build-backend = "setuptools.build_meta"
 
-[tool.setuptools]
-packages = ["image_token"]
+[tool.setuptools.packages.find]
+include = ["image_token*"]

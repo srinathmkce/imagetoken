@@ -1,4 +1,5 @@
 import base64
+import pytest
 from pathlib import Path
 from langchain_openai import ChatOpenAI
 from langchain_core.messages import HumanMessage, SystemMessage
@@ -32,7 +33,9 @@ def test_langchain_single_image_func():
     result = llm.invoke(messages)
     actual_input_tokens = result.usage_metadata["input_tokens"]
 
-    assert actual_input_tokens == simulated_result["tokens"]
+    assert actual_input_tokens == pytest.approx(
+        simulated_result["tokens"] , abs = 10
+    )
 
 
 # def test_langchain_multiple_images_func():

@@ -16,16 +16,22 @@ from conftest import (
     CACHE_TEST_IMAGE_URL,
     GPT_4_1_MINI_MODEL_NAME,
     GPT_4_1_NANO_MODEL_NAME,
-    MODEL_NAMES,
-    EXPECTED_OUTPUT_TOKENS,
+    GPT_MODEL_NAMES,
+    EXPECTED_OUTPUT_TOKENS_GPT,
+    GEMINI_MODEL_NAMES,
+    EXPECTED_OUTPUT_TOKENS_GEMINI,
     test_cases,
-    test_inputs
+    test_inputs,
 )
-from image_token.config import openai_config
-from image_token.main import process_image_from_url
-from image_token.caching_utils import ImageDimensionCache
+from image_token.utils.config import openai_config
+from image_token.utils.caching_utils import ImageDimensionCache
 import time
-from image_token.validate import check_if_path_is_file , check_if_path_is_folder , is_url , is_multiple_urls
+from image_token.utils.validate import (
+    check_if_path_is_file,
+    check_if_path_is_folder,
+    is_url,
+    is_multiple_urls,
+)
 
 
 def test_invalid_file_path():
@@ -49,60 +55,99 @@ def test_invalid_file_extension():
             get_token(model_name=GPT_4_1_MINI_MODEL_NAME, path=temp_file_path)
 
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_valid_file_path(model_name):
     assert (
         get_token(model_name=model_name, path=JPG_FILE_PATH)
-        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPG_FILE_PATH]
     )
 
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_multiple_fomat(model_name):
     assert (
         get_token(model_name=model_name, path=JPG_FILE_PATH)
-        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPG_FILE_PATH]
     )
     assert (
         get_token(model_name=model_name, path=JPEG_FILE_PATH)
-        == EXPECTED_OUTPUT_TOKENS[model_name][JPEG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPEG_FILE_PATH]
     )
     assert (
         get_token(model_name=model_name, path=PNG_FILE_PATH)
-        == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][PNG_FILE_PATH]
     )
 
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_multiple_fomat_url(model_name):
     assert (
         get_token(model_name=model_name, path=JPG_URL)
-        == EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPG_FILE_PATH]
     )
     assert (
         get_token(model_name=model_name, path=JPEG_URL)
-        == EXPECTED_OUTPUT_TOKENS[model_name][JPEG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPEG_FILE_PATH]
     )
     assert (
         get_token(model_name=model_name, path=PNG_URL)
-        == EXPECTED_OUTPUT_TOKENS[model_name][PNG_FILE_PATH]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name][PNG_FILE_PATH]
     )
 
 
+@pytest.mark.parametrize("model_name", GEMINI_MODEL_NAMES)
+def test_valid_file_path(model_name):
+    assert (
+        get_token(model_name=model_name, path=JPG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][JPG_FILE_PATH]
+    )
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+
+@pytest.mark.parametrize("model_name", GEMINI_MODEL_NAMES)
+def test_multiple_fomat(model_name):
+    assert (
+        get_token(model_name=model_name, path=JPG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][JPG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=JPEG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][JPEG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=PNG_FILE_PATH)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][PNG_FILE_PATH]
+    )
+
+
+@pytest.mark.parametrize("model_name", GEMINI_MODEL_NAMES)
+def test_multiple_fomat_url(model_name):
+    assert (
+        get_token(model_name=model_name, path=JPG_URL)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][JPG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=JPEG_URL)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][JPEG_FILE_PATH]
+    )
+    assert (
+        get_token(model_name=model_name, path=PNG_URL)
+        == EXPECTED_OUTPUT_TOKENS_GEMINI[model_name][PNG_FILE_PATH]
+    )
+
+
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_get_tokens_with_folder(model_name):
     path = str(Path("tests") / "image_folder")
     assert (
         get_token(model_name=model_name, path=path)
-        == EXPECTED_OUTPUT_TOKENS[model_name]["total_tokens"]
+        == EXPECTED_OUTPUT_TOKENS_GPT[model_name]["total_tokens"]
     )
 
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_get_tokens_for_file_and_save(model_name):
     output_path = f"{model_name}_output.json"
-    expected_tokens = EXPECTED_OUTPUT_TOKENS[model_name][JPG_FILE_PATH]
+    expected_tokens = EXPECTED_OUTPUT_TOKENS_GPT[model_name][JPG_FILE_PATH]
     assert (
         get_token(model_name=model_name, path=JPG_FILE_PATH, save_to=output_path)
         == expected_tokens
@@ -116,11 +161,11 @@ def test_get_tokens_for_file_and_save(model_name):
     os.remove(output_path)
 
 
-@pytest.mark.parametrize("model_name", MODEL_NAMES)
+@pytest.mark.parametrize("model_name", GPT_MODEL_NAMES)
 def test_get_tokens_for_folder_and_save(model_name):
     path = str(Path("tests") / "image_folder")
     output_path = f"{model_name}_output.json"
-    total_tokens = EXPECTED_OUTPUT_TOKENS[model_name]["total_tokens"]
+    total_tokens = EXPECTED_OUTPUT_TOKENS_GPT[model_name]["total_tokens"]
     assert (
         get_token(model_name=model_name, path=path, save_to=output_path) == total_tokens
     )
@@ -147,6 +192,7 @@ def test_get_token_on_resized_images(width, height):
     finally:
         os.remove(tmp_path)
 
+
 def test_sqlite_based_image_cache():
     config = openai_config["gpt-4.1-mini"]
 
@@ -155,11 +201,9 @@ def test_sqlite_based_image_cache():
         assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is None
 
         start_time = time.time()
-        tokens_1 = process_image_from_url(
-            url=CACHE_TEST_IMAGE_URL,
-            model_config=config,
-            cache=cache_instance,
-            model_name="gpt-4.1-mini"
+        tokens_1 = get_token(
+            path=CACHE_TEST_IMAGE_URL,
+            model_name="gpt-4.1-mini",
         )
         duration_1 = time.time() - start_time
         print(f"[First call] Duration without cache: {duration_1:.6f} seconds")
@@ -168,11 +212,9 @@ def test_sqlite_based_image_cache():
         assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is not None
 
         start_time = time.time()
-        tokens_2 = process_image_from_url(
-            url=CACHE_TEST_IMAGE_URL,
-            model_config=config,
-            cache=cache_instance,
-            model_name="gpt-4.1-mini"
+        tokens_2 = get_token(
+            path=CACHE_TEST_IMAGE_URL,
+            model_name="gpt-4.1-mini",
         )
         duration_2 = time.time() - start_time
         print(f"[Second call] Duration with cache: {duration_2:.10f} seconds")
@@ -184,11 +226,9 @@ def test_sqlite_based_image_cache():
         assert cache_instance.get_cached_dimensions(CACHE_TEST_IMAGE_URL) is None
 
         start_time = time.time()
-        tokens_3 = process_image_from_url(
-            CACHE_TEST_IMAGE_URL,
-            model_config=config,
-            cache=cache_instance,
-            model_name="gpt-4.1-mini"
+        tokens_3 = get_token(
+            path = CACHE_TEST_IMAGE_URL,
+            model_name="gpt-4.1-mini",
         )
         duration_3 = time.time() - start_time
         print(f"[Third call after cache delete] Duration: {duration_3:.6f} seconds")
@@ -200,7 +240,7 @@ def test_sqlite_based_image_cache():
 def test_check_if_path_is_file():
     """Test check_if_path_is_file - only file should return True"""
     assert check_if_path_is_file(test_inputs["file"]) == True
-    
+
     for key in test_inputs:
         if key != "file":
             assert check_if_path_is_file(test_inputs[key]) == False
@@ -209,26 +249,25 @@ def test_check_if_path_is_file():
 def test_check_if_path_is_folder():
     """Test check_if_path_is_folder - only folder should return True"""
     assert check_if_path_is_folder(test_inputs["folder"]) == True
-    
+
     for key in test_inputs:
-        if key != "folder": 
+        if key != "folder":
             assert check_if_path_is_folder(test_inputs[key]) == False
 
 
 def test_is_url():
     """Test is_url - only URL should return True"""
     assert is_url(test_inputs["url"]) == True
-    
 
     for key in test_inputs:
-        if key != "url": 
+        if key != "url":
             assert is_url(test_inputs[key]) == False
 
 
 def test_is_multiple_urls():
     """Test is_multiple_urls - only URLs list should return True"""
     assert is_multiple_urls(test_inputs["urls"]) == True
-    
+
     for key in test_inputs:
         if key != "urls":
             assert is_multiple_urls(test_inputs[key]) == False

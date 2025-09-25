@@ -4,11 +4,20 @@ from pathlib import Path
 JPG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpg")
 JPEG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.jpeg")
 PNG_FILE_PATH = str(Path("tests") / "image_folder" / "kitten.png")
-JPEG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
-JPG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
-PNG_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
-CACHE_TEST_IMAGE_URL = "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+JPEG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpeg"
+)
+JPG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.jpg"
+)
+PNG_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+)
+CACHE_TEST_IMAGE_URL = (
+    "https://raw.githubusercontent.com/srinathmkce/imagetoken/main/Images/kitten.png"
+)
 
+# GPT
 GPT_5_MINI_MODEL_NAME = "gpt-5-mini"
 GPT_5_NANO_MODEL_NAME = "gpt-5-nano"
 GPT_5_MODEL_NAME = "gpt-5"
@@ -20,19 +29,24 @@ GPT_4_O_MINI_MODEL_NAME = "gpt-4o-mini"
 GPT_4_O_MODEL_NAME = "gpt-4o"
 GPT_4_1_MODEL_NAME = "gpt-4.1"
 
+# GEMINI
+GEMINI_2_5_PRO = "gemini-2.5-pro"
+GEMINI_2_5_FLASH = "gemini-2.5-flash"
+GEMINI_2_5_FLASH_LITE = "gemini-2.5-flash-lite"
+GEMINI_2_5_FLASH_IMAGE_PREVIEW = "gemini-2.5-flash-image-preview"
+GEMINI_2_0_FLASH = "gemini-2.0-flash"
+GEMINI_2_0_FLASH_LITE = "gemini-2.0-flash-lite"
+
 # MODEL_NAMES = [
 #     GPT_4_1_MINI_MODEL_NAME, GPT_4_1_NANO_MODEL_NAME, O_4_MINI_MODEL_NAME,
 #     GPT_4_O_MINI_MODEL_NAME, GPT_4_O_MODEL_NAME, GPT_4_1_MODEL_NAME,
 # ]
 
-MODEL_NAMES = [
-    GPT_5_NANO_MODEL_NAME,
-    GPT_4_O_MODEL_NAME
-
-]
+GPT_MODEL_NAMES = [GPT_5_NANO_MODEL_NAME, GPT_4_O_MODEL_NAME]
+GEMINI_MODEL_NAMES = [GEMINI_2_5_PRO , GEMINI_2_0_FLASH]
 
 
-EXPECTED_OUTPUT_TOKENS = {
+EXPECTED_OUTPUT_TOKENS_GPT = {
     GPT_5_MINI_MODEL_NAME: {
         JPG_FILE_PATH: 643,
         JPEG_FILE_PATH: 1834,
@@ -95,6 +109,45 @@ EXPECTED_OUTPUT_TOKENS = {
     },
 }
 
+EXPECTED_OUTPUT_TOKENS_GEMINI = {
+    GEMINI_2_5_PRO: {
+        JPG_FILE_PATH: 258,
+        JPEG_FILE_PATH: 258,
+        PNG_FILE_PATH: 258,
+        "total_tokens": 774,
+    },
+    GEMINI_2_5_FLASH: {
+        JPG_FILE_PATH: 258,
+        JPEG_FILE_PATH: 258,
+        PNG_FILE_PATH: 258,
+        "total_tokens": 774,
+    },
+    GEMINI_2_5_FLASH_LITE: {
+        JPG_FILE_PATH: 258,
+        JPEG_FILE_PATH: 258,
+        PNG_FILE_PATH: 258,
+        "total_tokens": 774,
+    },
+    GEMINI_2_5_FLASH_IMAGE_PREVIEW: {
+        JPG_FILE_PATH: 258,
+        JPEG_FILE_PATH: 258,
+        PNG_FILE_PATH: 258,
+        "total_tokens": 774,
+    },
+    GEMINI_2_0_FLASH: {
+        JPG_FILE_PATH: 1290,
+        JPEG_FILE_PATH: 2580,
+        PNG_FILE_PATH: 1290,
+        "total_tokens": 5160,
+    },
+    GEMINI_2_0_FLASH_LITE: {
+        JPG_FILE_PATH: 1290,
+        JPEG_FILE_PATH: 2580,
+        PNG_FILE_PATH: 1290,
+        "total_tokens": 5160,
+    }
+}
+
 
 test_cases = {
     (64, 64): 15,
@@ -120,11 +173,11 @@ test_dimensions = [
 # Test data - 4 input types
 
 test_inputs = {
-    "file" : "tests/image_folder/kitten.jpg",
-    "folder" : "tests/image_folder",
-    "url" : JPEG_URL,
-    "urls" : [JPEG_URL , JPG_URL , PNG_URL],
-    "random" : "random text"
+    "file": "tests/image_folder/kitten.jpg",
+    "folder": "tests/image_folder",
+    "url": JPEG_URL,
+    "urls": [JPEG_URL, JPG_URL, PNG_URL],
+    "random": "random text",
 }
 
 # Provide access to test functions
